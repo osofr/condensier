@@ -9,6 +9,133 @@
 #' @param bin_estimator ....
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
+#'
+#' @section Details:
+#' **********************************************************************
+#'
+#' \itemize{
+#' \item As described in the following section, the first step is to construct an estimator \eqn{P_{g_N}(sA | sW)}
+#'    for the common (in \code{i}) conditional density \eqn{P_{g_0}(sA | sW)} for common (in \code{i}) unit-level summary
+#'    measures (\code{sA},\code{sW}).
+#'
+#' \item The same fitting algorithm is applied to construct an estimator \eqn{P_{g^*_N}(sA^* | sW^*)} of the common (in \code{i})
+#'    conditional density \eqn{P_{g^*}(sA^* | sW^*)} for common (in \code{i}) unit-level summary measures (\code{sA^*},\code{sW^*})
+#'    implied by the user-supplied stochastic intervention \code{f_gstar1} or \code{f_gstar2} and the observed distribution of \code{W}.
+#'
+#' \item These two density estimators form the basis of the IPTW estimator,
+#'    which is evaluated at the observed N data points \eqn{O_i=(sW_i, sA_i, Y_i), i=1,...,N} and is given by
+#'    \deqn{\psi^{IPTW}_n = \sum_{i=1,...,N}{Y_i \frac{P_{g^*_N}(sA^*=sA_i | sW=sW_i)}{P_{g_N}(sA=sA_i | sW=sW_i)}}.}
+#' }
+#'
+#' @section Modeling \code{P(sA|sW)} for summary measures \code{(sA,sW)}:
+#' **********************************************************************
+#'
+#' Non-parametric
+#'  estimation of the common \strong{unit-level} multivariate joint conditional probability model \code{P_g0(sA|sW)},
+#'  for unit-level summary measures \code{(sA,sW)} generated from the observed exposures and baseline covariates
+#'  \eqn{(A,W)=(A_i,W_i : i=1,...,N)} (their joint density given by \eqn{g_0(A|W)Q(W)}), is performed by first
+#'  constructing the dataset of N summary measures, \eqn{(sA_i,sW_i : i=1,...,N)}, and then fitting the usual i.i.d. MLE
+#'  for the common density \code{P_g0(sA|sW)} based on the pooled N sample of these summary measures.
+#'
+#'  Note that \code{sA} can be multivariate and any of its components \code{sA[j]} can be either binary, categorical
+#'  or continuous.
+#'  The joint probability model for \code{P(sA|sA)} = \code{P(sA[1],...,sA[k]|sA)} can be factorized as
+#'  \code{P(sA[1]|sA)} * \code{P(sA[2]|sA, sA[1])} * ... * \code{P(sA[k]|sA, sA[1],...,sA[k-1])},
+#'  where each of these conditional probability models is fit separately, depending on the type of the outcome variable
+#'  \code{sA[j]}.
+#'
+#'  If \code{sA[j]} is binary, the conditional probability \code{P(sA[j]|sW,sA[1],...,sA[j-1])} is evaluated via logistic
+#'  regression model.
+#'  When \code{sA[j]} is continuous (or categorical), its range will be fist partitioned into \code{K} bins and the
+#'  corresponding \code{K}
+#'  bin indicators (\code{B_1,...,B_K}), where each bin indicator \code{B_j} is then used as an outcome in a
+#'  separate logistic regression model with predictors given by \code{sW, sA[1],...,sA[k-1]}.
+#'  Thus, the joint probability \code{P(sA|sW)} is defined by such a tree of binary logistic regressions.
+#'
+#' For simplicity, we now suppose \code{sA} is continuous and univariate and we describe here an algorithm for fitting
+#'  \eqn{P_{g_0}(sA | sW)} (the algorithm
+#'  for fitting \eqn{P_{g^*}(sA^* | sW^*)} is equivalent, except that exposure \code{A} is replaced with exposure \code{A^*}
+#'  generated under \code{f_gstar1} or \code{f_gstar2} and
+#'  the predictors \code{sW} from the regression formula \code{hform.g0} are replaced with predictors \code{sW^*}
+#'  specified by the regression formula \code{hform.gstar}).
+#'
+#' \enumerate{
+#' \item Generate a dataset of N observed continuous summary measures (\code{sA_i}:i=1,...,N) from observed
+#'  ((\code{A_i},\code{W_i}):i=1,...,N).
+#'
+#' \item Divide the range of \code{sA} values into intervals S=(i_1,...,i_M,i_{M+1}) so that any observed data point
+#'    \code{sa_i} belongs to one interval in S, namely,
+#'    for each possible value sa of \code{sA} there is k\\in{1,...,M}, such that, i_k < \code{sa} <= i_{k+1}.
+#'    Let the mapping B(sa)\\in{1,...,M} denote a unique interval in S for sa, such that, i_{B(sa)} < sa <= i_{B(sa)+1}.
+#'    Let bw_{B(sa)}:=i_{B(sa)+1}-i_{B(sa)} be the length of the interval (bandwidth) (i_{B(sa)},i_{B(sa)+1}).
+#'    Also define the binary indicators b_1,...,b_M, where b_j:=I(B(sa)=j), for all j <= B(sa) and b_j:=NA for all j>B(sa).
+#'    That is we set b_j to missing ones the indicator I(B(sa)=j) jumps from 0 to 1.
+#'    Now let \code{sA} denote the random variable for the observed summary measure for one unit
+#'    and denote by (B_1,...,B_M) the corresponding random indicators for \code{sA} defined as B_j := I(B(\code{sA}) = j)
+#'    for all j <= B(\code{sA}) and B_j:=NA for all j>B(\code{sA}).
+#'
+#' \item For each j=1,...,M, fit the logistic regression model for the conditional probability P(B_j = 1 | B_{j-1}=0, sW), i.e.,
+#'    at each j this is defined as the conditional probability of B_j jumping from 0 to 1 at bin j, given that B_{j-1}=0 and
+#'    each of these logistic regression models is fit only among the observations that are still at risk of having B_j=1 with B_{j-1}=0.
+#'
+#' \item Normalize the above conditional probability of B_j jumping from 0 to 1 by its corresponding interval length (bandwidth) bw_j to
+#'    obtain the discrete conditional hazards h_j(sW):=P(B_j = 1 | (B_{j-1}=0, sW) / bw_j, for each j.
+#'    For the summary measure \code{sA}, the above conditional hazard h_j(sW) is equal to P(\code{sA} \\in (i_j,i_{j+1}) | \code{sA}>=i_j, sW),
+#'    i.e., this is the probability that \code{sA} falls in the interval (i_j,i_{j+1}), conditional on sW and conditional on the fact that
+#'    \code{sA} does not belong to any intervals before j.
+#'
+#' \item  Finally, for any given data-point \code{(sa,sw)}, evaluate the discretized conditional density for P(\code{sA}=sa|sW=sw) by first
+#'    evaluating the interval number k=B(sa)\\in{1,...,M} for \code{sa} and then computing \\prod{j=1,...,k-1}{1-h_j(sW))*h_k(sW)}
+#'    which is equivalent to the joint conditional probability that \code{sa} belongs to the interval (i_k,i_{k+1}) and does not belong
+#'    to any of the intervals 1 to k-1, conditional on sW.
+#'  }
+#'
+#' The evaluation above utilizes a discretization of the fact that any continuous density f of random variable X can be written as f_X(x)=S_X(x)*h_X(x),
+#'  for a continuous density f of X where S_X(x):=P(X>x) is the survival function for X, h_X=P(X>x|X>=x) is the hazard function for X; as well as the fact that
+#'  the discretized survival function S_X(x) can be written as a of the hazards for s<x: S_X(x)=\\prod{s<x}h_X(x).
+#'
+#' @section Three methods for defining bin (interval) cuttoffs for a continuous one-dimenstional summary measure \code{sA[j]}:
+#' **********************************************************************
+#'
+#' There are 3 alternative methods to defining the bin cutoffs S=(i_1,...,i_M,i_{M+1}) for a continuous summary measure
+#'  \code{sA}. The choice of which method is used along with other discretization parameters (e.g., total number of
+#'  bins) is controlled via the tmlenet_options() function. See \code{?tmlenet_options} argument \code{bin.method} for
+#'  additional details.
+#'
+#' Approach 1 (\code{equal.len}): equal length, default.
+#'
+#' *********************
+#'
+#' The bins are defined by splitting the range of observed \code{sA} (sa_1,...,sa_n) into equal length intervals.
+#'  This is the dafault discretization method, set by passing an argument \code{bin.method="equal.len"} to
+#'  \code{tmlenet_options} function prior to calling \code{tmlenet()}. The intervals will be defined by splitting the
+#'  range of (sa_1,...,sa_N) into \code{nbins} number of equal length intervals, where \code{nbins} is another argument
+#'  of \code{tmlenet_options()} function. When \code{nbins=NA} (the default setting) the actual value of \code{nbins}
+#'  is computed at run time by taking the integer value (floor) of \code{n/maxNperBin},
+#'  for \code{n} - the total observed sample size and \code{maxNperBin=1000} - another argument of
+#'  \code{tmlenet_options()} with the default value 1,000.
+#'
+#' Approach 2 (\code{equal.mass}): data-adaptive equal mass intervals.
+#'
+#' *********************
+#'
+#' The intervals are defined by splitting the range of \code{sA} into non-equal length data-adaptive intervals that
+#'  ensures that each interval contains around
+#'  \code{maxNperBin} observations from (sa_j:j=1,...,N).
+#'  This interval definition approach can be selected by passing an argument \code{bin.method="equal.mass"} to
+#'  \code{tmlenet_options()} prior to calling \code{tmlenet()}.
+#'  The method ensures that an approximately equal number of observations will belong to each interval, where that number
+#'  of observations for each interval
+#'  is controlled by setting \code{maxNperBin}. The default setting is \code{maxNperBin=1000} observations per interval.
+#'
+#' Approach 3 (\code{dhist}): combination of 1 & 2.
+#'
+#' *********************
+#'
+#' The data-adaptive approach dhist is a mix of Approaches 1 & 2. See Denby and Mallows "Variations on the Histogram"
+#'  (2009)). This interval definition method is selected by passing an argument \code{bin.method="dhist"} to
+#'  \code{tmlenet_options()}  prior to calling \code{tmlenet()}.
+#'
 #' @return An R6 object containing the model fit(s).
 #' @export
 fit_density <- function(
