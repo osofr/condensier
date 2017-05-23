@@ -255,13 +255,13 @@ DataStore <- R6Class(classname = "DataStore",
           # *) reconstruct correct expression that tests for missing values
           res <- res & (!gvars$misfun(sVar.vec))
         }
-        return(res)
+        return(which(res))
       # ******************************************************
       # NOTE: Below is currently not being used, all subsetting now is done with subsetvars above, for speed & memory efficiency
       # ******************************************************
       } else {
         if (is.logical(subsetexpr)) {
-          return(subsetexpr)
+          return(which(subsetexpr))
         } else {
           # ******************************************************
           # THIS WAS A BOTTLENECK: for 500K w/ 1000 bins: 4-5sec
@@ -276,7 +276,7 @@ DataStore <- R6Class(classname = "DataStore",
     },
 
     # return a covar matrix which will be used as a design matrix for BinOutModelClass
-    get.dat.sWsA = function(rowsubset = TRUE, covars) {
+    get.dat.sWsA = function(rowsubset, covars) {
       if (!missing(covars)) {
 
         if (length(unique(colnames(self$dat.sWsA))) < length(colnames(self$dat.sWsA))) {
@@ -286,10 +286,18 @@ DataStore <- R6Class(classname = "DataStore",
         # columns to select from main design matrix (in the same order as listed in covars):
         sel.sWsA <- intersect(covars, colnames(self$dat.sWsA))
 
+        if (missing(rowsubset)) {
+          rowsubset <- 1:nrow(self$dat.sWsA)
+        } else if (is.logical(rowsubset)) {
+          rowsubset <- which(rowsubset)
+        } else if (!is.integer(rowsubset)) {
+          stop("rowsubset must be logical or integer subset of rows")
+        }
+
         if (is.matrix(self$dat.sWsA)) {
           dfsel <- self$dat.sWsA[rowsubset, sel.sWsA, drop = FALSE] # data stored as matrix
         } else if (is.data.table(self$dat.sWsA)) {
-          dfsel <- self$dat.sWsA[rowsubset, sel.sWsA, drop = FALSE, with = FALSE] # data stored as data.table
+          dfsel <- self$dat.sWsA[rowsubset, sel.sWsA, with = FALSE] # data stored as data.table
         } else {
           stop("self$dat.sWsA is of unrecognized class: " %+% class(self$dat.sWsA))
         }

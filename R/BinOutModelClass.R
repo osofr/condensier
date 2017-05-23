@@ -134,8 +134,11 @@ BinDat <- R6Class(classname = "BinDat",
       self$outvars_to_pool <- reg$outvars_to_pool
       self$ReplMisVal0 <- reg$ReplMisVal0
       self$nbins <- reg$nbins
-      if (is.null(reg$subset)) {self$subset_expr <- TRUE}
-      assert_that(is.logical(self$subset_expr) || is.call(self$subset_expr) || is.character(self$subset_expr))
+
+      # if (is.null(reg$subset)) {self$subset_expr <- TRUE}
+      # if (is.null(reg$subset)) {self$subset_expr <- NULL}
+
+      assert_that(is.logical(self$subset_expr) || is.call(self$subset_expr) || is.character(self$subset_expr) || is.null(self$subset_expr))
       invisible(self)
     },
 
@@ -156,8 +159,15 @@ BinDat <- R6Class(classname = "BinDat",
     },
 
     define.subset_idx = function(data) {
-      if (is.logical(self$subset_expr)) {
-        subset_idx <- self$subset_expr
+
+      if (is.null(self$subset_expr)) {
+        subset_idx <- 1:data$nobs
+      } else if (is.logical(self$subset_expr)) {
+        if (length(self$subset_expr) == 1L) {
+          subset_idx <- rep.int(self$subset_expr, data$nobs)
+        } else {
+          subset_idx <- self$subset_expr
+        }
       # ******************************************************
       # NOTE: Below subsetting by call/expression is currently disabled, for speed & memory efficiency
       # all subsetting is done by subsetvars (variable name(s) must be non-missing)
@@ -168,13 +178,13 @@ BinDat <- R6Class(classname = "BinDat",
       } else if (is.character(self$subset_expr)) {
         subset_idx <- data$evalsubst(subsetvars = self$subset_expr)
       }
-      assert_that(is.logical(subset_idx))
-      if ((length(subset_idx) < self$n) && (length(subset_idx) > 1L)) {
-        if (gvars$verbose) message("subset_idx has smaller length than self$n; repeating subset_idx p times, for p: " %+% data$p)
-        subset_idx <- rep.int(subset_idx, data$p)
-        if (length(subset_idx) != self$n) stop("BinDat$define.subset_idx: self$n is not equal to nobs*p!")
-      }
-      assert_that((length(subset_idx) == self$n) || (length(subset_idx) == 1L))
+      # assert_that(is.logical(subset_idx))
+      # if ((length(subset_idx) < self$n) && (length(subset_idx) > 1L)) {
+        # if (gvars$verbose) message("subset_idx has smaller length than self$n; repeating subset_idx p times, for p: " %+% data$p)
+        # subset_idx <- rep.int(subset_idx, data$p)
+        # if (length(subset_idx) != self$n) stop("BinDat$define.subset_idx: self$n is not equal to nobs!")
+      # }
+      # assert_that((length(subset_idx) == self$n) || (length(subset_idx) == 1L))
       return(subset_idx)
     },
 
@@ -185,7 +195,7 @@ BinDat <- R6Class(classname = "BinDat",
       self$n <- data$nobs
       self$subset_idx <- self$define.subset_idx(data)
       if (getoutvar) private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # Always a vector
-      if (sum(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
+      if (sum(self$subset_idx) == 0L || length(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
         private$X_mat <- matrix(, nrow = 0L, ncol = (length(self$predvars) + 1))
         colnames(private$X_mat) <- c("Intercept", self$predvars)
       } else {
@@ -407,7 +417,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       assert_that(self$is.fitted)
       assert_that(!missing(newdata))
       self$bindat$newdata(newdata = newdata, getoutvar = TRUE) # populate bindat with new design matrix covars X_mat
-      assert_that(is.logical(self$getsubset))
+      # assert_that(is.logical(self$getsubset))
       n <- newdata$nobs
       # obtain predictions (likelihood) for response on fitted data (from long pooled regression):
       if (self$bindat$pool_cont && length(self$bindat$outvars_to_pool) > 1) {
@@ -454,7 +464,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       self$bindat$subset_expr <- self$bindat$subset_expr[!self$bindat$subset_expr %in% self$bindat$outvar]
       self$bindat$newdata(newdata = newdata, getoutvar = FALSE) # populate bindat with new design matrix covars X_mat
 
-      assert_that(is.logical(self$getsubset))
+      # assert_that(is.logical(self$getsubset))
       n <- newdata$nobs
       # obtain predictions (likelihood) for response on fitted data (from long pooled regression):
       if (self$bindat$pool_cont && length(self$bindat$outvars_to_pool) > 1) {

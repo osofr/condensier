@@ -1,8 +1,4 @@
 ### --- Test setup ---
-`%+%` <- function(a, b) paste0(a, b)
-as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
-allNA = function(x) all(is.na(x))
-
 if(FALSE) {
   # CHECK AND BUILD PACKAGE:
   # library("condensier")

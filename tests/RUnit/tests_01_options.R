@@ -3,23 +3,23 @@ library(mockery)
 context("Package Options zzz.R")
 
 test.opts.misfun.chkpkgs <- function() {
-  checkException(old_opts <- condensier_options(bin.method = "blah"))
+  expect_error(old_opts <- condensier_options(bin.method = "blah"))
 
   funmiss <- condensier:::testmisfun()
-  checkTrue(funmiss(NA))
-  checkTrue(is.na(condensier:::get.misval()))
+  expect_true(funmiss(NA))
+  expect_true(is.na(condensier:::get.misval()))
 
   condensier:::set.misval(condensier:::gvars, NaN)
-  checkTrue(is.nan(condensier:::gvars$misval))
+  expect_true(is.nan(condensier:::gvars$misval))
   condensier:::set.misval(condensier:::gvars, NA)
-  checkTrue(is.na(condensier:::gvars$misval))
+  expect_true(is.na(condensier:::gvars$misval))
 
-  checkException(condensier:::checkpkgs("blahblah"))
+  expect_error(condensier:::checkpkgs("blahblah"))
 
   warns <- condensier:::GetWarningsToSuppress()
 
   testdat <- data.frame(a = rnorm(5), b = rep("str", 5), stringsAsFactors=TRUE)
-  checkTrue(condensier:::CheckExistFactors(data = testdat)%in%"b")
+  expect_true(condensier:::CheckExistFactors(data = testdat)%in%"b")
 }
 
 # making bin indicator matrix from ordinal sVar:
@@ -84,7 +84,7 @@ test.RegressionClass <- function() {
   # [1] "P(A1|W1,W2)"
   # [1] "Init BinOutModel:"
   # [1] "P(A2|A1,W1,W2)"
-  checkTrue("BinOutModel" %in% class(model1$getPsAsW.models()$`P(sA|sW).1`))
+  expect_true("BinOutModel" %in% class(model1$getPsAsW.models()$`P(sA|sW).1`))
 
   reg_test2 <- RegressionClass$new(outvar.class = c(condensier:::gvars$sVartypes$bin, condensier:::gvars$sVartypes$bin),
                                   outvar = c("A1", "A2"),
@@ -94,7 +94,7 @@ test.RegressionClass <- function() {
   reg_test2$subset
   model2 <- SummariesModel$new(reg = reg_test2)
 
-  checkException(
+  expect_error(
     reg_test3 <- RegressionClass$new(outvar.class = c(condensier:::gvars$sVartypes$cont, condensier:::gvars$sVartypes$cont),
                                     outvar = c("sA"), predvars = c("W1", "W2", "W3"),
                                     subset = list(quote(sA==0)))
@@ -105,8 +105,8 @@ test.RegressionClass <- function() {
                                   # subset = list(quote(sA==0)))
 
   reg_test_new <- reg_test3$clone()
-  checkTrue(all.equal(reg_test3, reg_test_new))
-  checkTrue("RegressionClass" %in% class(reg_test3))
+  expect_true(all.equal(reg_test3, reg_test_new))
+  expect_true("RegressionClass" %in% class(reg_test3))
   nsamp <- 1000
   datO <- get.testDat(nsamp)
   head(datO)
@@ -226,7 +226,7 @@ test.intervals <- function() {
                         c = condensier:::gvars$sVartypes$cat,
                         d = condensier:::gvars$sVartypes$cont)
   out.types <- condensier:::detect.col.types(test_mat)
-  checkTrue(all.equal(correct.types, out.types))
+  expect_true(all.equal(correct.types, out.types))
 
   # ------------------------------------------------------------------------------
   # Simulate some network data
@@ -248,9 +248,9 @@ test.intervals <- function() {
   nettest$getNetInd
 
   NetInd_k_toobig <- t(replicate(1000, sample(1:1000, Kmax, replace = FALSE)))
-  checkException(nettest$NetInd <- NetInd_k_toobig)
+  expect_error(nettest$NetInd <- NetInd_k_toobig)
   nettest$NetInd <- NetInd_k
-  checkEquals(nettest$NetInd, NetInd_k)
+  expect_equal(nettest$NetInd, NetInd_k)
 
   ## ---------------------------------------------------------------------
   # TESTING ContinSummaryModel class and newsummarymodel.contin constructor
@@ -351,9 +351,9 @@ test.detect.int.sA <- function() {
                                             max_nperbin = 100)
 
   # Testing ordinals with ncats < nbins get nbins = ncats:
-  checkTrue((length(defints2)-1) < nbins)
+  expect_true((length(defints2)-1) < nbins)
   # Testing all categories in ordinal are represented for categorical with 3 values (nF):
-  checkTrue(all(unique(datNetObs$dat.sWsA[["nF"]])%in%defints2))
+  expect_true(all(unique(datNetObs$dat.sWsA[["nF"]])%in%defints2))
 
   # ----------------------------------------------------------------------------------------
   # ******** THIS IS PRETTY BAD. THE RESULT COLLAPSES nF TO 3/4 categories only ***********
@@ -429,8 +429,8 @@ test.NetIndClassFromString <- function() {
   netindcl <- simcausal::NetIndClass$new(nobs = nrow(dftest1), Kmax = k)
   netindcl$makeNetInd.fromIDs(Net_str = dftest1[,"NETID"])
   netindcl$NetInd_k
-  checkTrue("matrix" %in% class(netindcl$NetInd_k))
-  checkTrue("integer" %in% class(netindcl$NetInd_k[,1]))
+  expect_true("matrix" %in% class(netindcl$NetInd_k))
+  expect_true("integer" %in% class(netindcl$NetInd_k[,1]))
 }
 
 # TESTING sVar expressions parser:
@@ -463,23 +463,23 @@ test.DefineSummariesClass <- function() {
   # **** Example TESTING Kmax substitute ****
   defsVar.expr0 <- def_sW(sA.1 = A[[Kmax]])
   evaled.sVar.expr0 <- defsVar.expr0$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  checkTrue(all(as.vector(evaled.sVar.expr0[["A_netF2"]]) %in% c(rep(3,4),NA)))
+  expect_true(all(as.vector(evaled.sVar.expr0[["A_netF2"]]) %in% c(rep(3,4),NA)))
 
   defsVar.expr0 <- def_sW(A)
   evaled.sVar.expr0 <- defsVar.expr0$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
 
   defsVar.expr0 <- def_sW(A[[0:Kmax]])
   evaled.sVar.expr0 <- defsVar.expr0$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  # checkTrue(is.matrix(evaled.sVar.expr0))
+  # expect_true(is.matrix(evaled.sVar.expr0))
 
   # Example 1.
   defsVar.expr1a <- def_sW(sA.1 = rowSums(A[[0:Kmax]]))
   evaled.sVar.expr1a <- defsVar.expr1a$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
   defsVar.expr1b <- def_sW(sA.1 = sum(A[[0:Kmax]]))
   evaled.sVar.expr1b <- defsVar.expr1b$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  checkTrue(all.equal(evaled.sVar.expr1a, evaled.sVar.expr1b))
+  expect_true(all.equal(evaled.sVar.expr1a, evaled.sVar.expr1b))
   # w/ NA for missing vars:
-  checkTrue(is.na(evaled.sVar.expr1a[5,sA.1]))
+  expect_true(is.na(evaled.sVar.expr1a[5,sA.1]))
 
   # Example 2. Using a variable to pass sVar expression.
   # ************************************************************************************************************************
@@ -493,12 +493,12 @@ test.DefineSummariesClass <- function() {
   defsVar.expr2$exprs_list
   evaled.sVar.expr2 <- defsVar.expr2$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
   res1 <- as.integer(c(5, 6, 7, 8, NA))
-  checkTrue(all.equal(as.vector(evaled.sVar.expr2[["sA.1"]]), res1))
+  expect_true(all.equal(as.vector(evaled.sVar.expr2[["sA.1"]]), res1))
 
   defsVar.expr1 <- def_sW(sA.1 = sum(A[[0:Kmax]]))
   evaled.sVar.expr1 <- defsVar.expr1$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  checkTrue(all.equal(evaled.sVar.expr1, evaled.sVar.expr2))
-  checkTrue(all(res1 %in% as.vector(evaled.sVar.expr1[["sA.1"]])))
+  expect_true(all.equal(evaled.sVar.expr1, evaled.sVar.expr2))
+  expect_true(all(res1 %in% as.vector(evaled.sVar.expr1[["sA.1"]])))
 
   # Example 3. Generate a matrix of sVar[1], ..., sVar[j] from one sVar expression.
   defsVar.expr1 <- def_sW(W = W[[0:Kmax]])
@@ -506,7 +506,7 @@ test.DefineSummariesClass <- function() {
 
   # k is not a known constant (Kmax is), will parse this as having two parents: W and k => will throw exception
   defsVar.expr1 <- def_sW(W[[0:k]])
-  checkException(evaled.sVar.expr1 <- defsVar.expr1$eval.nodeforms(data.df = dftest, netind_cl = netind_cl))
+  expect_error(evaled.sVar.expr1 <- defsVar.expr1$eval.nodeforms(data.df = dftest, netind_cl = netind_cl))
   # correct way to do above (k is defined in this environment):
   defsVar.expr1a <- def_sW(netW = W[[0:k]], replaceNAw0=TRUE)
   evaled.sVar.expr1a <- defsVar.expr1a$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
@@ -514,10 +514,10 @@ test.DefineSummariesClass <- function() {
   # this will parse as having only one parent (Kmax is a known constant) => no exception
   defsVar.expr1b <- def_sW(W[[0:Kmax]], replaceNAw0=TRUE)
   evaled.sVar.expr1b <- defsVar.expr1b$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  # checkTrue(!any((evaled.sVar.expr1a-evaled.sVar.expr1b)!=0))
+  # expect_true(!any((evaled.sVar.expr1a-evaled.sVar.expr1b)!=0))
 
-  # checkTrue(is.matrix(evaled.sVar.expr1))
-  checkTrue(all(evaled.sVar.expr1[["W"]] == dftest$W))
+  # expect_true(is.matrix(evaled.sVar.expr1))
+  expect_true(all(evaled.sVar.expr1[["W"]] == dftest$W))
 
   # Example 4a. Generate a matrix of sVar[1], ..., sVar[j] from one sVar expression that is a combination of different Vars in Odata.
   defsVar.expr <- def_sA(sA.1 = W[[0:Kmax]] + sum(A[[1:Kmax]]), replaceNAw0 = TRUE)
@@ -529,19 +529,19 @@ test.DefineSummariesClass <- function() {
   evaled.testres1 <- testres1_cl$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
   testres2_cl <- def_sA(sA.1 = rowSums(A[[1:Kmax]]), replaceNAw0 = TRUE)
   evaled.testres2 <- testres2_cl$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  # checkTrue(all((evaled.testres1 + as.vector(evaled.testres2)) == evaled.sVar.expr))
+  # expect_true(all((evaled.testres1 + as.vector(evaled.testres2)) == evaled.sVar.expr))
 
   # Example 4b. Generate a matrix of sVar[1], ..., sVar[j] from one sVar expression that is a combination of different Vars in Odata.
   defsVar.expr <- def_sW(W = "W[[0:Kmax]] + rowSums(A[[1:Kmax]])", replaceNAw0 = TRUE)
   class(defsVar.expr$sVar.exprs[["W"]])
   defsVar.expr$sVar.exprs[["W"]]
   evaled.sVar.expr2 <- defsVar.expr$eval.nodeforms(data.df = dftest,  netind_cl = netind_cl)
-  # checkTrue(all(evaled.sVar.expr2[,c(1,2,3)]==evaled.sVar.expr))
+  # expect_true(all(evaled.sVar.expr2[,c(1,2,3)]==evaled.sVar.expr))
 
   # Example 5. sum of prod of netA and netW:
   defsVar.expr <- def_sA(sumAWnets = sum(A[[1:Kmax]] * W[[1:Kmax]]), replaceNAw0 = TRUE)
   evaled.sVar.expr <- defsVar.expr$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
-  checkTrue(all(as.integer(as.vector(evaled.sVar.expr[["sumAWnets"]])) == c(30,30,30,30,6)))
+  expect_true(all(as.integer(as.vector(evaled.sVar.expr[["sumAWnets"]])) == c(30,30,30,30,6)))
 
   # Example 6. More than one summary measure
   defsVar.expr <- def_sA(A = A, sumAnets = sum(A[[1:Kmax]]), sumAWnets = sum(A[[1:Kmax]] * W[[1:Kmax]]), replaceNAw0 = TRUE)
@@ -555,5 +555,5 @@ test.DefineSummariesClass <- function() {
   evaled.sVar.expr <- defsVar.expr$eval.nodeforms(data.df = dftest, netind_cl = netind_cl)
 
   defsVar.expr <- def_sA(A, sumAnets = sum(A[[1:Kmax]])) + def_sA(sum(A[[1:Kmax]] * W[[1:Kmax]]), replaceNAw0 = TRUE)
-  checkException(evaled.sVar.expr <- defsVar.expr$eval.nodeforms(data.df = dftest, netind_cl = netind_cl))
+  expect_error(evaled.sVar.expr <- defsVar.expr$eval.nodeforms(data.df = dftest, netind_cl = netind_cl))
 }

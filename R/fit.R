@@ -58,6 +58,7 @@ predict_probability <- function(model_fit, newdata) {
                                Y = model_fit$reg$outvar,
                                X = model_fit$reg$predvars,
                                auto_typing = FALSE)
+
   return(model_fit$predictAeqa(newdata = newdata_obj))
 }
 
