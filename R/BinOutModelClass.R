@@ -448,9 +448,8 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       assert_that(self$is.fitted)
       assert_that(!missing(newdata))
 
-      # browser()
       # Don't want to subset by the outvar, since binarized mat for cat outcome is not re-created when just sampling
-      # But need to reset it back when done
+      # But need to reset the subset expression back to its original value when done.
       temp_subset_expr <- self$bindat$subset_expr
       self$bindat$subset_expr <- self$bindat$subset_expr[!self$bindat$subset_expr %in% self$bindat$outvar]
       self$bindat$newdata(newdata = newdata, getoutvar = FALSE) # populate bindat with new design matrix covars X_mat
@@ -485,6 +484,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       #     probAeqa[self$getsubset] <- probAeqa[self$getsubset] * exp(-bw.j.sA_diff[self$getsubset]*(1/self$bw.j)*probA1)^(indA)
       #   }
       }
+
       # **********************************************************************
       # to save RAM space when doing many stacked regressions wipe out all internal data:
       self$wipe.alldat
@@ -495,14 +495,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
     },
 
     show = function() {self$bindat$show()}
-    # ,
-    # # return new R6 object that only contains a copy of the fits in self
-    # clone = function(deep = TRUE) {
-    #   BinOutModel$new(reg = reg, ...)
-    #   assert_that("BinOutModel" %in% class(bin.out.model))
-    #   assert_that(self$is.fitted)
-    #   private$probA1 <- bin.out.model$getprobA1
-    # }
+
   ),
   active = list(
     wipe.alldat = function() {

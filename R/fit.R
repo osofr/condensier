@@ -29,18 +29,20 @@ fit_density <- function(
   # Find the class of the provided variable
   outcome.class <- data_store_obj$type.sVar[Y]
 
-  subset_vars <- lapply(Y, function(var) {var})
+  # subset_vars <- lapply(Y, function(var) {var})
 
   # Put all est_params in RegressionClass
   regclass <- RegressionClass$new(bin_estimator = bin_estimator,
                                   nbins = nbins,
                                   outvar.class = outcome.class,
                                   outvar = Y,
-                                  predvars = X,
-                                  subset = subset_vars)
+                                  predvars = X)
+                                  # subset = subset_vars)
 
   # Create the conditional density, based on the regression just specified and fit it
   conditional_density <- SummariesModel$new(reg = regclass, data_object = data_store_obj)
+
+  # print("conditional_density$reg$subset"); print(conditional_density$reg$subset)
 
   conditional_density$fit(data = data_store_obj)
 

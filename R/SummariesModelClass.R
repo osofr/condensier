@@ -194,7 +194,7 @@ SummariesModel <- R6Class(classname = "SummariesModel",
     ## Sample new outcome (A), given predictors (X) in newdata
     ## The outcome can be continuous / categorical
     sampleA = function(newdata, ...) {
-      # stop("not implemented")
+
       assert_that(!missing(newdata))
       assert_that(is.DataStore(newdata))
       n <- newdata$nobs
@@ -213,11 +213,6 @@ SummariesModel <- R6Class(classname = "SummariesModel",
           sampleA_mat[(sampleA_mat[, k_i - 1] == 0L), k_i] <- sampleA_newcat[(sampleA_mat[, k_i - 1] == 0L)]
         }
       }
-
-      # browser()
-      # print(head(sampleA_mat))
-      # nF.PA <- rowSums(1L - sampleA_mat) + 1L
-      # # print(table(as.vector(sampleA_mat)))
 
       if (length(private$PsAsW.models) > 1) {
         sampleA_mat[, length(private$PsAsW.models)] <- 1L # make last category a reference category

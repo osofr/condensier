@@ -8,7 +8,6 @@
   # *) turning continuous sVar into categorical (discretize.sVar)
   # *) creating binary indicator matrix for continous/categorical sVar (binirize.sVar, binirize.cat.sVar)
   # *) creating design matrix (Xmat) based on predvars and row subsets (evalsubst)
-  # *) sampling exposures from input intervention f_gstar and generating summary measures (sW,sA) from this new exposure (make.dat.sWsA, f.gen.A.star)
 
 is.integerish <- function (x) is.integer(x) || (is.numeric(x) && all(x == as.integer(x)))
 
@@ -202,9 +201,7 @@ DataStore <- R6Class(classname = "DataStore",
       if (auto_typing) self$def.types.sVar(Y = Y) # Define the type of each Y: bin, cat or cont
 
       # normalize continuous and non-missing sVars, overwrite their columns in mat.sVar with normalized [0,1] vals
-      if (self$norm.c.sVars) {
-        self$norm_c_sVars()
-      }
+      if (self$norm.c.sVars) self$norm_c_sVars()
 
       return(invisible(self))
     },
@@ -247,8 +244,6 @@ DataStore <- R6Class(classname = "DataStore",
     },
 
     # Eval the expression (in the environment of the data.frame "data" + global constants "gvars"):
-    # Could also do evaluation in a special env with a custom subsetting fun '[' that will dynamically find the correct dataset that contains
-    # sVar.name (dat.sVar or dat.bin.sVar) and will return sVar vector
     evalsubst = function(subsetexpr, subsetvars) {
       if (missing(subsetexpr)) {
         assert_that(!missing(subsetvars))

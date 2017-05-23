@@ -180,7 +180,8 @@ RegressionClass <- R6Class("RegressionClass",
           # ... TO FINISH ...
         }
       } else {
-        self$subset <- rep_len(list(TRUE), n_regs)
+        # self$subset <- rep_len(list(TRUE), n_regs)
+        self$subset <- rep_len(list(NULL), n_regs)
       }
     },
 
@@ -216,8 +217,8 @@ RegressionClass <- R6Class("RegressionClass",
         self$predvars <- c(reg$outvar[-c(k_i:n_regs)], reg$predvars) # Predictors
       }
 
-      # The subset is a list when RegressionClass specifies several regression models at once,
-      # obtain the appropriate subset for this regression k_i and set it to self
+      # The subset becomes a list when a single RegressionClass specifies several regression models.
+      # Each list item specifies the appropriate subset for regression idnex k_i.
       # On the other hand, if subset is a vector of variable names, all of those variables will be used for
       # choosing the subsets for all n_regs regressions.
       if (is.list(reg$subset)) {
