@@ -20,7 +20,7 @@ devtools::install_github('osofr/densier', build_vignettes = FALSE)
 Simulate some data with continuous outcome ("sA"):
 
 ```R
-require(simcausal)
+library("simcausal")
 D <- DAG.empty()
 D <-
 D + node("W1", distr = "rbern", prob = 0.5) +
@@ -35,6 +35,7 @@ datO <- sim(D, n = 10000, rndseed = 12345)
 Fit conditional density:
 
 ```R
+library("condensier")
 dens_fit <- fit_density(
     X = c("W1", "W2", "W3"), 
     Y = "sA", 
@@ -47,7 +48,7 @@ Wrapper function to predict the conditional probability (likelihood) for new obs
 
 ```R
 newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
-preds <- predict_probability(dens_obj, newdata)
+preds <- predict_probability(dens_fit, newdata)
 ```
 
 Wrapper function to sample the values from the conditional density fit:

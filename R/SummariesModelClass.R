@@ -589,7 +589,6 @@ CategorSummaryModel <- R6Class(classname = "CategorSummaryModel",
     },
 
     sampleA = function(newdata) {
-      # stop("not implemented")
       assert_that(is.DataStore(newdata))
       # bring the sampled variable back to its original scale / levels:
       sampleA <- self$levels[super$sampleA(newdata = newdata)]
