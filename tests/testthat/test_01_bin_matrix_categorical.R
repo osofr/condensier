@@ -1,8 +1,96 @@
+library(mockery)
+context("DataStore Categorical Bin Matrix")
+
+# helper function for generating some data
+get.testDat <- function(nsamp = 100000) {
+  `%+%` <- function(a, b) paste0(a, b)
+  require(simcausal)
+  options(simcausal.verbose = FALSE)
+  D <- DAG.empty()
+  D <-
+  D + node("W1", distr = "rbern", prob = 0.5) +
+      node("W2", distr = "rbern", prob = 0.3) +
+      node("W3", distr = "rbern", prob = 0.3) +
+      node("sA.mu", distr = "rconst", const = (0.98 * W1 + 0.58 * W2 + 0.33 * W3)) +
+      node("sA", distr = "rnorm", mean = sA.mu, sd = 1)
+  D <- set.DAG(D, n.test = 10)
+  datO <- sim(D, n = nsamp, rndseed = 12345)
+}
+
+test_that("categorical variable can be binned in various ways, including it being treated as continuous", {
+# test.detect.int.sA <- function() {
+  nsamp <- 1000
+  nbins <- 10
+  oldopts <- condensier_options(maxncats = 5, nbins = nbins)
+  # ----------------------------------------------------------------------------------------
+  # Continuous
+  # ----------------------------------------------------------------------------------------
+  datO <- get.testDat(nsamp = nsamp)
+  data.table::setDT(datO)
+  Kmax <- 10L
+  datO[, "nF" := sample(1L:Kmax, nrow(datO), replace = TRUE)]
+  datNetObs <- DataStore$new(input_data = datO, Y = "nF", X = c("W1", "W2", "W3", "nF"))
+
+  # ----------------------------------------------------------------------------------------
+  # ******** THIS IS PRETTY BAD. THE RESULT COLLAPSES nF TO 3/4 categories only ***********
+  # Categorical w maxncats < ncats, so gets detected as contin and categories get collapsed
+  # ----------------------------------------------------------------------------------------
+  # datNetObs <- makedat(nsamp=nsamp, Kmax=10)
+  condensier_options(maxncats = 5, nbins = 10)
+  obsdat.sW <- datNetObs$dat.sVar
+  head(obsdat.sW,10)
+  table(obsdat.sW[["nF"]])
+  # 0   6   7   8   9  10
+  # 1   1   1   2   3 992
+  str(datNetObs$type.sVar)
+  # $ nF: chr "contin"
+
+  defints3a <- datNetObs$detect.sVar.intrvls("nF",
+                                            nbins = nbins,
+                                            bin_bymass = TRUE,
+                                            bin_bydhist = FALSE,
+                                            max_nperbin = 100)
+  defints3a
+
+  defints3b <- datNetObs$detect.sVar.intrvls("nF",
+                                            nbins = nbins,
+                                            bin_bymass = FALSE,
+                                            bin_bydhist = FALSE,
+                                            max_nperbin = 100)
+  defints3b
+
+  defints3c <- datNetObs$detect.sVar.intrvls("nF",
+                                            nbins = length(unique(obsdat.sW[,"nF"])),
+                                            bin_bymass = FALSE,
+                                            bin_bydhist = FALSE,
+                                            max_nperbin = 100)
+  defints3c
+
+  defints3d <- datNetObs$detect.sVar.intrvls("nF",
+                                            nbins = 2,
+                                            bin_bymass = FALSE,
+                                            bin_bydhist = FALSE,
+                                            max_nperbin = 100)
+  defints3d
+
+  defints3e <- datNetObs$detect.sVar.intrvls("nF",
+                                            nbins = 30,
+                                            bin_bymass = FALSE,
+                                            bin_bydhist = FALSE,
+                                            max_nperbin = 100)
+  defints3e
+
+ do.call(condensier_options, oldopts)
+})
+
+
+
+
 # ------------------------------------------------------------------------------------------
 # TEST SET 5 FOR CATEGORICAL TREATMENT sA (with network net.sA=sum(sA[[1:Kmax]]/nF))
 # ------------------------------------------------------------------------------------------
 
-`%+%` <- function(a, b) paste0(a, b)
+
 # ------------------------------------------------------------------------------------------
 # Simulate network data:
 # ------------------------------------------------------------------------------------------

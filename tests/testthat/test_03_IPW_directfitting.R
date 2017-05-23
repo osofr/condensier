@@ -11,6 +11,7 @@ allNA <- function(x) all(is.na(x))
 ## helper fun
 get.density.sAdat <- function(nsamp = 100000) {
   require(simcausal)
+  options(simcausal.verbose = FALSE)
   D <- DAG.empty()
   D <-
   D + node("W1", distr = "rbern", prob = 0.5) +
