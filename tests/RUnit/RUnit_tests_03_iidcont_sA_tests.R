@@ -48,26 +48,27 @@ test.fit_density <- function() {
   datO <- get.density.sAdat(nsamp)
 
   ## new function wrapper, fits the density and returns the model fit object:
-  dens_obj <- fit_density(X = c("W1", "W2", "W3"), Y = "sA", input_data = datO, nbins = 20)
-  checkTrue(inherits(dens_obj, "SummariesModel"))
+  dens_fit <- fit_density(X = c("W1", "W2", "W3"), Y = "sA", input_data = datO, nbins = 20, bin_estimator = speedglmR6$new())
+  checkTrue(inherits(dens_fit, "SummariesModel"))
 
   ## new function wrapper, predict the probability (likelihood) for newdata
   newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
-  preds <- predict_probability(dens_obj, newdata)
+  preds <- predict_probability(dens_fit, newdata)
 
   newdata_obj <- DataStore$new(input_data = newdata, Y = "sA", X = c("W1", "W2", "W3"), auto_typing = FALSE)
   checkTrue(is.null(newdata_obj$type.sVar))
 
-  dens_obj$predict(newdata = newdata_obj)  # summeas.g0$sA_nms
+  dens_fit$predict(newdata = newdata_obj)  # summeas.g0$sA_nms
 
-  preds_test <- dens_obj$predictAeqa(newdata = newdata_obj)
+  preds_test <- dens_fit$predictAeqa(newdata = newdata_obj)
   checkTrue(all.equal(preds, preds_test))
 
   ## new function wrapper, sample the values from the conditional density fit:
+  checkException(sampledY <- sample_value(dens_fit, newdata[, c("W1", "W2", "W3"), with = FALSE]))
   set.seed(123456)
-  sampledY <- dens_obj$sampleA(newdata = newdata_obj)
+  sampledY <- sample_value(dens_fit, newdata)
   set.seed(123456)
-  sampledY_test <- sample_value(dens_obj, newdata)
+  sampledY_test <- dens_fit$sampleA(newdata = newdata_obj)
   checkTrue(all.equal(sampledY, sampledY_test))
 
 }

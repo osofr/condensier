@@ -14,6 +14,42 @@ To install the development version of `densier` (requires the `devtools` package
 devtools::install_github('osofr/densier', build_vignettes = FALSE)
 ```
 
+
+### Instructions
+
+Simulate some data with continuous outcome ("sA"):
+
+```R
+require(simcausal)
+D <- DAG.empty()
+D <-
+D + node("W1", distr = "rbern", prob = 0.5) +
+  node("W2", distr = "rbern", prob = 0.3) +
+  node("W3", distr = "rbern", prob = 0.3) +
+  node("sA.mu", distr = "rconst", const = (0.98 * W1 + 0.58 * W2 + 0.33 * W3)) +
+  node("sA", distr = "rnorm", mean = sA.mu, sd = 1)
+D <- set.DAG(D, n.test = 10)
+datO <- sim(D, n = 10000, rndseed = 12345)
+```
+
+Fit conditional density:
+
+```R
+dens_fit <- fit_density(X = c("W1", "W2", "W3"), Y = "sA", input_data = datO, nbins = 20, bin_estimator = speedglmR6$new())
+```
+
+Wrapper function to predict the conditional probability (likelihood) for new observations:
+
+```R
+newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
+preds <- predict_probability(dens_obj, newdata)
+```
+
+Wrapper function to sample the values from the conditional density fit:
+```R
+sampledY <- sample_value(dens_fit, newdata)
+```
+
 ### Funding
 The development of this package was funded through an NIH grant (R01 AI074345-07).
 
