@@ -135,9 +135,12 @@ glmR6 <- R6Class("glmR6",
         do.fit = function(X_mat, Y_vals) {
           ctrl <- glm.control(trace = FALSE)
           # ctrl <- glm.control(trace = FALSE, maxit = 1000)
-          SuppressGivenWarnings({
+          # SuppressGivenWarnings({
+          #   return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
+          # }, GetWarningsToSuppress())
+          suppressWarnings({
             return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
-          }, GetWarningsToSuppress())
+          })
         },
 
         do.predict = function(X_mat, m.fit) {
@@ -168,9 +171,9 @@ speedglmR6 <- R6Class("speedglmR6",
 
         do.fit = function(X_mat, Y_vals) {
           # , maxit=1000
-          m.fit <- try(speedglm::speedglm.wfit(X = X_mat, y = Y_vals, family = binomial(), trace = FALSE, method='Cholesky'), silent = TRUE)
+          m.fit <- try(suppressWarnings(speedglm::speedglm.wfit(X = X_mat, y = Y_vals, family = binomial(), trace = FALSE, method='Cholesky')), silent = TRUE)
           if (inherits(m.fit, "try-error")) { # if failed, fall back on stats::glm
-            message("speedglm::speedglm.wfit failed, falling back on stats:glm.fit; ", m.fit)
+            if (gvars$verbose) message("speedglm::speedglm.wfit failed, falling back on stats:glm.fit; ", m.fit)
             return(private$fallback_function(X_mat, Y_vals))
           }
           return(m.fit)

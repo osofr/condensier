@@ -1,121 +1,6 @@
-### --- Test setup ---
-`%+%` <- function(a, b) paste0(a, b)
-as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
-allNA = function(x) all(is.na(x))
+library(mockery)
 
-if(FALSE) {
-  # CHECK AND BUILD PACKAGE:  library("RUnit")
-  library("roxygen2")
-  library("devtools")
-  library("RUnit")
-  setwd(".."); setwd(".."); getwd()
-  document()
-  load_all("./", create = FALSE) # load all R files in /R and datasets in /data. Ignores NAMESPACE:
-  # condensier:::debug_set() # SET TO DEBUG MODE
-
-  setwd("..");
-  install("condensier", build_vignettes = FALSE, dependencies = FALSE) # INSTALL W/ devtools:
-
-  # system("echo $PATH") # see the current path env var
-  # system("R CMD Rd2pdf condensier")  # just create the pdf manual from help files
-
-  getwd()
-  # setwd("./condensier"); setwd(".."); getwd()
-  devtools::check(args = "--as-cran")
-  devtools::check(args = c("--no-vignettes"), build_args = c("--no-build-vignettes")) # runs faster
-  # devtools::check() # runs check with devtools
-  # devtools::check(args = c("--no-vignettes"), build_args = c("--no-build-vignettes")) # runs check with devtools
-  # devtools::build_win(args = "--compact-vignettes") # build package on CRAN servers (windows os?)
-  # devtools::build()
-  devtools::build(args = "--compact-vignettes")
-  # devtools::build(args = c("--compact-vignettes", "--resave-data"))
-  devtools::build_win(args = "--as-cran") # build package on CRAN servers (windows os?)
-  # devtools::build_win(args = "--compact-vignettes") # build package on CRAN servers (windows os?)
-  # devtools::build(args = "--compact-vignettes") # build package tarball compacting vignettes
-  # devtools::build(args = "--no-build-vignettes") # build package tarball compacting vignettes
-  # devtools::build() # build package tarball
-  setwd("..")
-  system("R CMD check --as-cran condensier_0.1.0.tar.gz") # check R package tar ball prior to CRAN submission
-      ## system("R CMD check --no-manual --no-vignettes condensier") # check without building the pdf manual and not building vignettes
-      ## system("R CMD build condensier --no-build-vignettes --as-cran")
-      # system("R CMD build condensier --resave-data")
-  # devtools::use_travis() # SET UP TRAVIS CONFIG FILE
-  # INSTALLING FROM SOURCE:
-  # install.packages("./condensier_0.2.0.tar.gz", repos = NULL, type="source", dependencies=TRUE)
-  # library(condensier)
-  # condensier:::debug_set() # SET TO DEBUG MODE
-  # condensier:::debug_off() # SET DEBUG MODE OFF
-
-  # To install a specific branch:
-  # devtools::install_github('osofr/simcausal', ref = "simnet", build_vignettes = FALSE)
-  # devtools::install_github('osofr/condensier', ref = "master", build_vignettes = FALSE)
-
-  # TEST COVERATE:
-  # if your working directory is in the packages base directory
-  # package_coverage()
-  # or a package in another directory
-  # cov <- package_coverage("condensier")
-  # view results as a data.frame
-  # as.data.frame(cov)
-  # zero_coverage() can be used to filter only uncovered lines.
-  # zero_coverage(cov)
-}
-
-sample_checks <- function() {   # doesn`t run, this is just to show what test functions can be used
-  print("Starting tests...")
-    checkTrue(1 < 2, "check1")     ## passes fine
-     ## checkTrue(1 > 2, "check2")  ## appears as failure in the test protocol
-     v <- 1:3
-     w <- 1:3
-     checkEquals(v, w)               ## passes fine
-     names(v) <- c("A", "B", "C")
-     ## checkEquals(v, w)            ## fails because v and w have different names
-     checkEqualsNumeric(v, w)        ## passes fine because names are ignored
-     x <- rep(1:12, 2)
-     y <- rep(0:1, 12)
-     res <- list(a=1:3, b=letters, LM=lm(y ~ x))
-     res2 <- list(a=seq(1,3,by=1), b=letters, LM=lm(y ~ x))
-     checkEquals( res, res2)        ## passes fine
-     checkIdentical( res, res)
-     checkIdentical( res2, res2)
-     ## checkIdentical( res, res2)  ## fails because element 'a' differs in type
-     fun <- function(x) {
-       if(x)
-       {
-        stop("stop conditions signaled")
-       }
-       return()
-     }
-     checkException(fun(TRUE))      ## passes fine
-     ## checkException(fun(FALSE))  ## failure, because fun raises no error
-     checkException(fun(TRUE), silent=TRUE)
-     ##  special constants
-     ##  same behaviour as for underlying base functions
-     checkEquals(NA, NA)
-     checkEquals(NaN, NaN)
-     checkEquals(Inf, Inf)
-     checkIdentical(NA, NA)
-     checkIdentical(NaN, NaN)
-     checkIdentical(-Inf, -Inf)
-}
-
-
-test.bugfixes <- function() {
-
-}
-
-# Add a bug with automatic interval/bin detection on binary variable (all vals get placed in one bin)
-test.bin01bug <- function() {
-
-}
-
-test.nullnodesbug <- function() {
-  # When is.null(DatNet$nodes) no checks are made and regression is attempted anyways
-  # results in uninterpretable errror
-  # ....................................
-  # Fixed by setting DataStore$get.outvar to throw an error when outvar is not found
-  # ....................................
-}
+context("Package Options zzz.R")
 
 test.opts.misfun.chkpkgs <- function() {
   checkException(old_opts <- condensier_options(bin.method = "blah"))
@@ -528,24 +413,24 @@ test.detect.int.sA <- function() {
 }
 
 test.NetIndClassFromString <- function() {
-	# ----------------------------------------------------------------------------------------
-	# TESTING NetIndClass CLASS
-	# ----------------------------------------------------------------------------------------
-	k <- 2
-	dftestW <- data.frame(W = as.integer(c(6,7,8,9,10))) # W_netF1 = rep(6,5), W_netF2 = rep(8,5)
-	dftestA <- data.frame(A = as.integer(c(1,2,3,4,5))) # , A_netF1 = rep(1,5), A_netF2 = rep(3,5)
-	class(dftestW$W)
-	class(dftestA$A)
+  # ----------------------------------------------------------------------------------------
+  # TESTING NetIndClass CLASS
+  # ----------------------------------------------------------------------------------------
+  k <- 2
+  dftestW <- data.frame(W = as.integer(c(6,7,8,9,10))) # W_netF1 = rep(6,5), W_netF2 = rep(8,5)
+  dftestA <- data.frame(A = as.integer(c(1,2,3,4,5))) # , A_netF1 = rep(1,5), A_netF2 = rep(3,5)
+  class(dftestW$W)
+  class(dftestA$A)
 
-	NET_id <- c(rep("1 3", nrow(dftestW)-1), "1")
-	class(dftestW$A)
-	dftest1 <- data.frame(dftestW, dftestA, NETID = NET_id, stringsAsFactors = FALSE)
-	is.factor(dftest1$NETID)
+  NET_id <- c(rep("1 3", nrow(dftestW)-1), "1")
+  class(dftestW$A)
+  dftest1 <- data.frame(dftestW, dftestA, NETID = NET_id, stringsAsFactors = FALSE)
+  is.factor(dftest1$NETID)
   netindcl <- simcausal::NetIndClass$new(nobs = nrow(dftest1), Kmax = k)
   netindcl$makeNetInd.fromIDs(Net_str = dftest1[,"NETID"])
-	netindcl$NetInd_k
-	checkTrue("matrix" %in% class(netindcl$NetInd_k))
-	checkTrue("integer" %in% class(netindcl$NetInd_k[,1]))
+  netindcl$NetInd_k
+  checkTrue("matrix" %in% class(netindcl$NetInd_k))
+  checkTrue("integer" %in% class(netindcl$NetInd_k[,1]))
 }
 
 # TESTING sVar expressions parser:

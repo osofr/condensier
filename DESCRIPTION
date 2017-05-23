@@ -3,6 +3,7 @@ Title: Non-Parametric Conditional Density Estimation
 Version: 0.0.1
 Authors@R: c(
     person("Oleg", "Sofrygin", role=c("aut", "cre"), email="oleg.sofrygin@gmail.com"),
+    person("Antoine", "Chambaz", role="aut", email="achambaz@u-paris10.fr"),
     person(c("Mark", "J."), "van der Laan", role="aut", email="laan@berkeley.edu"))
 Description: TBD
 URL: https://github.com/osofr/condensier
@@ -24,11 +25,12 @@ LinkingTo: Rcpp
 Suggests:
     doParallel,
     foreach,
-    igraph,
     knitr,
     locfit,
     matrixStats,
-    RUnit
+    roxygen2,
+    testthat,
+    mockery
 VignetteBuilder: knitr
 License: GPL-2
 LazyData: true

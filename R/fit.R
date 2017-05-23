@@ -24,7 +24,7 @@ fit_density <- function(
   if (!is.data.table(input_data)) data.table::setDT(input_data)
 
   ## import the input data into internal storage class
-  data_store_obj <- DataStore$new(input_data = data.table::data.table(datO), Y = "sA", X = c("W1", "W2", "W3"))
+  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X)
 
   # Find the class of the provided variable
   outcome.class <- data_store_obj$type.sVar[Y]
@@ -47,6 +47,8 @@ fit_density <- function(
   return(conditional_density)
 }
 
+## ---------------------------------------------------------------------------------------
+#' Predict probability (likelihood) for existing fit, given new data
 #' @export
 predict_probability <- function(model_fit, newdata) {
   assert_that(is(model_fit, "SummariesModel"))
@@ -57,6 +59,8 @@ predict_probability <- function(model_fit, newdata) {
   return(model_fit$predictAeqa(newdata = newdata_obj))
 }
 
+## ---------------------------------------------------------------------------------------
+#' Sample values from existing conditional density fit, given new data
 #' @export
 sample_value <- function(model_fit, newdata) {
   assert_that(is(model_fit, "SummariesModel"))
