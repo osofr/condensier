@@ -6,7 +6,7 @@
 \usage{
 fit_density(X, Y, input_data, nbins = getopt("nbins"),
   bin_estimator = getopt("bin_estimator"),
-  verbose = getOption("densier.verbose"))
+  verbose = getOption("condensier.verbose"))
 }
 \arguments{
 \item{X}{A vector containing the names of predictor variables to use for modeling.}
@@ -20,7 +20,7 @@ fit_density(X, Y, input_data, nbins = getopt("nbins"),
 \item{bin_estimator}{....}
 
 \item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
-Turn this on by default using \code{options(densier.verbose=TRUE)}.}
+Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
 }
 \value{
 An R6 object containing the model fit(s).

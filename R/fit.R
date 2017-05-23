@@ -8,7 +8,7 @@
 #' @param nbins ...
 #' @param bin_estimator ....
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
-#' Turn this on by default using \code{options(densier.verbose=TRUE)}.
+#' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
 #' @return An R6 object containing the model fit(s).
 #' @export
 fit_density <- function(
@@ -17,7 +17,7 @@ fit_density <- function(
                       input_data,
                       nbins = getopt("nbins"),
                       bin_estimator = getopt("bin_estimator"),
-                      verbose = getOption("densier.verbose")
+                      verbose = getOption("condensier.verbose")
                       ) {
 
   # gvars$verbose <- verbose
@@ -49,7 +49,6 @@ fit_density <- function(
 
 #' @export
 predict_probability <- function(model_fit, newdata) {
-  # assert_that(inherits(model_fit, "SummariesModel"))
   assert_that(is(model_fit, "SummariesModel"))
   newdata_obj <- DataStore$new(newdata,
                                Y = model_fit$reg$outvar,

@@ -1,12 +1,12 @@
-Package: densier
+Package: condensier
 Title: Non-Parametric Conditional Density Estimation
 Version: 0.0.1
 Authors@R: c(
     person("Oleg", "Sofrygin", role=c("aut", "cre"), email="oleg.sofrygin@gmail.com"),
     person(c("Mark", "J."), "van der Laan", role="aut", email="laan@berkeley.edu"))
 Description: TBD
-URL: https://github.com/osofr/densier
-BugReports: https://github.com/osofr/densier/issues
+URL: https://github.com/osofr/condensier
+BugReports: https://github.com/osofr/condensier/issues
 Depends:
     R (>= 3.2.0)
 Imports:

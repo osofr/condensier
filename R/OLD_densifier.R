@@ -7,7 +7,7 @@
 # @docType package
 # @author Oleg Sofrygin, Mark J. van der Laan
 
-#' @useDynLib densier
+#' @useDynLib condensier
 #' @import R6
 #' @importFrom Rcpp sourceCpp
 #' @importFrom grDevices nclass.FD nclass.Sturges nclass.scott

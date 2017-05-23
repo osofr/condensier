@@ -178,8 +178,8 @@ test.simple.fit.density.sA <- function() {
   # Test the coef and summary functions for binoutmodel class:
   out_ContinSummaryModel <- summeas.g0$getPsAsW.models()$`P(sA|sW).1`
   out_BinModels <- out_ContinSummaryModel$getPsAsW.models()
-  print(densier:::coef.BinOutModel(out_BinModels[[1]]))
-  print(densier:::summary.BinOutModel(out_BinModels[[2]]))
+  print(condensier:::coef.BinOutModel(out_BinModels[[1]]))
+  print(condensier:::summary.BinOutModel(out_BinModels[[2]]))
 
   # (intrvls <- out_ContinSummaryModel$intrvls)
   # (intrvls.width <- diff(intrvls))
@@ -238,8 +238,8 @@ test.simple.fit.density.sA <- function() {
   # Test the coef and summary functions for binoutmodel class:
   out_ContinSummaryModel <- summeas.g0.glm$getPsAsW.models()$`P(sA|sW).1`
   out_BinModels <- out_ContinSummaryModel$getPsAsW.models()
-  print(densier:::coef.BinOutModel(out_BinModels[[1]]))
-  print(densier:::summary.BinOutModel(out_BinModels[[2]]))
+  print(condensier:::coef.BinOutModel(out_BinModels[[1]]))
+  print(condensier:::summary.BinOutModel(out_BinModels[[2]]))
 
   summeas.g0.glm$predict(newdata = data_store_obj)
   h_gN.glm <- summeas.g0.glm$predictAeqa(newdata = data_store_obj) # *** DataStore$O.datnetA IS TO BE RENAMED TO $O.O.datnetA for clarity ***
@@ -301,8 +301,8 @@ test.simple.fit.density.sA <- function() {
   # [9]     1.6959939     2.3455552     3.3931981     4.9362651  1004.9362651
 
   out_BinModels <- out_ContinSummaryModel$getPsAsW.models()
-  print(densier:::coef.BinOutModel(out_BinModels[[1]]))
-  print(densier:::summary.BinOutModel(out_BinModels[[2]]))
+  print(condensier:::coef.BinOutModel(out_BinModels[[1]]))
+  print(condensier:::summary.BinOutModel(out_BinModels[[2]]))
 
   summeas.g0$predict(newdata = data_store_obj)
   h_gN <- summeas.g0$predictAeqa(newdata = data_store_obj) # *** DataStore$O.datnetA IS TO BE RENAMED TO $O.O.datnetA for clarity ***

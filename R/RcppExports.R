@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 logit_linkinv <- function(eta) {
-    .Call('densier_logit_linkinv', PACKAGE = 'densier', eta)
+    .Call('condensier_logit_linkinv', PACKAGE = 'condensier', eta)
 }
 

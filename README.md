@@ -1,17 +1,17 @@
-densier
+condensier
 ==========
 
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/densier)](http://cran.r-project.org/package=densier)
-[![](http://cranlogs.r-pkg.org/badges/densier)](http://cran.rstudio.com/web/packages/densier/index.html)
-[![Travis-CI Build Status](https://travis-ci.org/osofr/densier.svg?branch=master)](https://travis-ci.org/osofr/densier)
-[![Coverage Status](https://coveralls.io/repos/osofr/densier/badge.png?branch=master&service=github)](https://coveralls.io/r/osofr/densier?branch=master)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/condensier)](http://cran.r-project.org/package=condensier)
+[![](http://cranlogs.r-pkg.org/badges/condensier)](http://cran.rstudio.com/web/packages/condensier/index.html)
+[![Travis-CI Build Status](https://travis-ci.org/osofr/condensier.svg?branch=master)](https://travis-ci.org/osofr/condensier)
+[![Coverage Status](https://coveralls.io/repos/osofr/condensier/badge.png?branch=master&service=github)](https://coveralls.io/r/osofr/condensier?branch=master)
 
 ### Installation
 
-To install the development version of `densier` (requires the `devtools` package):
+To install the development version of `condensier` (requires the `devtools` package):
 
 ```R
-devtools::install_github('osofr/densier', build_vignettes = FALSE)
+devtools::install_github('osofr/condensier', build_vignettes = FALSE)
 ```
 
 

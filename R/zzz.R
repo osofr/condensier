@@ -1,10 +1,10 @@
 
 #-----------------------------------------------------------------------------
-# Global State Vars (can be controlled globally with options(densier.optname = ))
+# Global State Vars (can be controlled globally with options(condensier.optname = ))
 #-----------------------------------------------------------------------------
 gvars <- new.env(parent = emptyenv())
 gvars$verbose <- FALSE      # verbose mode (print all messages)
-gvars$opts <- list()        # named list of package options that is controllable by the user (densier_options())
+gvars$opts <- list()        # named list of package options that is controllable by the user (condensier_options())
 gvars$misval <- NA_integer_ # the default missing value for observations (# gvars$misval <- -.Machine$integer.max)
 gvars$misXreplace <- 0L     # the default replacement value for misval that appear in the design matrix
 gvars$tolerr <- 10^-12      # tolerance error: assume for abs(a-b) < gvars$tolerr => a = b
@@ -24,18 +24,18 @@ getopt <- function(optname) {
   return(opt[[optname]])
 }
 
-#' Print Current Option Settings for \code{densier}
-#' @return Invisibly returns a list of \code{densier} options.
-#' @seealso \code{\link{densier_options}}
+#' Print Current Option Settings for \code{condensier}
+#' @return Invisibly returns a list of \code{condensier} options.
+#' @seealso \code{\link{condensier_options}}
 #' @export
-print_densier_opts <- function() {
+print_condensier_opts <- function() {
   print(gvars$opts)
   invisible(gvars$opts)
 }
 
-#' Setting Options for \code{densier}
+#' Setting Options for \code{condensier}
 #'
-#' Additional options that control the estimation algorithm in \code{densier} package
+#' Additional options that control the estimation algorithm in \code{condensier} package
 #' @param bin_estimator The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link[speedglm]{speedglmR6}})
 #'  another default option is \code{\link[stats]{glmR6}}.
 #' @param bin.method The method for choosing bins when discretizing and fitting the conditional continuous summary
@@ -48,7 +48,7 @@ print_densier_opts <- function() {
 #' @param parfit Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
 #'  \code{foreach} and \code{dopar} to perform
 #'  parallel logistic regression fits and predictions for discretized continuous outcomes. This functionality
-#'  requires registering a parallel backend prior to running \code{densier} function, e.g.,
+#'  requires registering a parallel backend prior to running \code{condensier} function, e.g.,
 #'  using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer
 #'  \code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".
 #' @param nbins Set the default number of bins when discretizing a continous outcome variable under setting
@@ -63,9 +63,9 @@ print_densier_opts <- function() {
 #' @param maxNperBin Max number of observations per 1 bin for a continuous outcome (applies directly when
 #'  \code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).
 #' @return Invisibly returns a list with old option settings.
-#' @seealso \code{\link{print_densier_opts}}
+#' @seealso \code{\link{print_condensier_opts}}
 #' @export
-densier_options <- function(bin_estimator = speedglmR6$new(),
+condensier_options <- function(bin_estimator = speedglmR6$new(),
                             parfit = FALSE,
                             bin.method = c("equal.len", "equal.mass", "dhist"),
                             nbins = NA,
@@ -123,31 +123,31 @@ set.misval <- function(gvars, newmisval) {
 }
 gvars$misfun <- testmisfun()
 
-# Allows densier functions to use e.g., getOption("densier.verbose") to get verbose printing status
+# Allows condensier functions to use e.g., getOption("condensier.verbose") to get verbose printing status
 .onLoad <- function(libname, pkgname) {
   op <- options()
-  op.densier <- list(
-    densier.verbose = gvars$verbose
+  op.condensier <- list(
+    condensier.verbose = gvars$verbose
   )
   # reset all options to their defaults on load:
-  densier_options()
+  condensier_options()
 
-  toset <- !(names(op.densier) %in% names(op))
-  if(any(toset)) options(op.densier[toset])
+  toset <- !(names(op.condensier) %in% names(op))
+  if(any(toset)) options(op.condensier[toset])
 
   invisible()
 }
 
 .onAttach <- function(...) {
-  packageStartupMessage('densier')
-  packageStartupMessage('The densier package is still in beta testing. Interpret results with caution.')
-  #   packageStartupMessage('Version: ', utils::packageDescription('densier')$Version)
-  #   packageStartupMessage('Package created on ', utils::packageDescription('densier')$Date, '\n')
+  packageStartupMessage('condensier')
+  packageStartupMessage('The condensier package is still in beta testing. Interpret results with caution.')
+  #   packageStartupMessage('Version: ', utils::packageDescription('condensier')$Version)
+  #   packageStartupMessage('Package created on ', utils::packageDescription('condensier')$Date, '\n')
   #   packageStartupMessage('Please note this package is still in its early stages of development.
-   # Check for updates and report bugs at http://github.com/osofr/densier.', '\n')
-  #   packageStartupMessage('To see the vignette use vignette("densier_vignette", package="densier").
-  # To see all available package documentation use help(package = "densier") and ?densier.', '\n')
-  #   packageStartupMessage('To see the latest updates for this version, use news(package = "densier").', '\n')
+   # Check for updates and report bugs at http://github.com/osofr/condensier.', '\n')
+  #   packageStartupMessage('To see the vignette use vignette("condensier_vignette", package="condensier").
+  # To see all available package documentation use help(package = "condensier") and ?condensier.', '\n')
+  #   packageStartupMessage('To see the latest updates for this version, use news(package = "condensier").', '\n')
 }
 
 
