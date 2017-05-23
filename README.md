@@ -35,7 +35,12 @@ datO <- sim(D, n = 10000, rndseed = 12345)
 Fit conditional density:
 
 ```R
-dens_fit <- fit_density(X = c("W1", "W2", "W3"), Y = "sA", input_data = datO, nbins = 20, bin_estimator = speedglmR6$new())
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"), 
+    Y = "sA", 
+    input_data = datO, 
+    nbins = 20, 
+    bin_estimator = speedglmR6$new())
 ```
 
 Wrapper function to predict the conditional probability (likelihood) for new observations:
