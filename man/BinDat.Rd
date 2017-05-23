@@ -13,7 +13,7 @@ This R6 class can request, store and manage the design matrix Xmat, as well as t
  logistic regression P(Bin|Xmat).
  Can also be used for converting data in wide format to long when requested,
  e.g., when pooling across binary indicators (fitting one pooled logistic regression model for several indicators)
- The class has methods that perform queries to data storage R6 class DatNet.sWsA to get appropriate data columns & row subsets
+ The class has methods that perform queries to data storage R6 class DataStore to get appropriate data columns & row subsets
 }
 \details{
 \itemize{
@@ -38,9 +38,7 @@ This R6 class can request, store and manage the design matrix Xmat, as well as t
   \item{\code{newdata()}}{...}
   \item{\code{define.subset_idx(...)}}{...}
   \item{\code{setdata()}}{...}
-  \item{\code{logispredict()}}{...}
   \item{\code{setdata.long()}}{...}
-  \item{\code{logispredict.long()}}{...}
 }
 }
 
@@ -55,6 +53,6 @@ This R6 class can request, store and manage the design matrix Xmat, as well as t
   \item{\code{getY}}{...}
 }
 }
-
 \keyword{R6}
 \keyword{class}
+

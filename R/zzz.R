@@ -1,10 +1,10 @@
 
 #-----------------------------------------------------------------------------
-# Global State Vars (can be controlled globally with options(tmlenet.optname = ))
+# Global State Vars (can be controlled globally with options(densier.optname = ))
 #-----------------------------------------------------------------------------
 gvars <- new.env(parent = emptyenv())
 gvars$verbose <- FALSE      # verbose mode (print all messages)
-gvars$opts <- list()        # named list of package options that is controllable by the user (tmlenet_options())
+gvars$opts <- list()        # named list of package options that is controllable by the user (densier_options())
 gvars$misval <- NA_integer_ # the default missing value for observations (# gvars$misval <- -.Machine$integer.max)
 gvars$misXreplace <- 0L     # the default replacement value for misval that appear in the design matrix
 gvars$tolerr <- 10^-12      # tolerance error: assume for abs(a-b) < gvars$tolerr => a = b
@@ -24,18 +24,18 @@ getopt <- function(optname) {
   return(opt[[optname]])
 }
 
-#' Print Current Option Settings for \code{tmlenet}
-#' @return Invisibly returns a list of \code{tmlenet} options.
-#' @seealso \code{\link{tmlenet_options}}
+#' Print Current Option Settings for \code{densier}
+#' @return Invisibly returns a list of \code{densier} options.
+#' @seealso \code{\link{densier_options}}
 #' @export
-print_tmlenet_opts <- function() {
+print_densier_opts <- function() {
   print(gvars$opts)
   invisible(gvars$opts)
 }
 
-#' Setting Options for \code{tmlenet}
+#' Setting Options for \code{densier}
 #'
-#' Additional options that control the estimation algorithm in \code{tmlenet} package
+#' Additional options that control the estimation algorithm in \code{densier} package
 #' @param bin_estimator The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link[speedglm]{speedglmR6}})
 #'  another default option is \code{\link[stats]{glmR6}}.
 #' @param bin.method The method for choosing bins when discretizing and fitting the conditional continuous summary
@@ -48,24 +48,24 @@ print_tmlenet_opts <- function() {
 #' @param parfit Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
 #'  \code{foreach} and \code{dopar} to perform
 #'  parallel logistic regression fits and predictions for discretized continuous outcomes. This functionality
-#'  requires registering a parallel backend prior to running \code{tmlenet} function, e.g., 
-#'  using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer 
+#'  requires registering a parallel backend prior to running \code{densier} function, e.g.,
+#'  using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer
 #'  \code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".
-#' @param nbins Set the default number of bins when discretizing a continous outcome variable under setting 
-#'  \code{bin.method = "equal.len"}. 
-#'  If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of 
+#' @param nbins Set the default number of bins when discretizing a continous outcome variable under setting
+#'  \code{bin.method = "equal.len"}.
+#'  If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
 #'  \code{nobs}/\code{maxNperBin}, where \code{nobs} is the total number of observations in the input data.
-#' @param maxncats Max number of unique categories a categorical variable \code{sA[j]} can have. 
+#' @param maxncats Max number of unique categories a categorical variable \code{sA[j]} can have.
 #' If \code{sA[j]} has more it is automatically considered continuous.
 #' @param poolContinVar Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
-#' When fitting a model for binirized continuous outcome, set to \code{TRUE} 
+#' When fitting a model for binirized continuous outcome, set to \code{TRUE}
 #' for pooling bin indicators across several bins into one outcome regression?
-#' @param maxNperBin Max number of observations per 1 bin for a continuous outcome (applies directly when 
+#' @param maxNperBin Max number of observations per 1 bin for a continuous outcome (applies directly when
 #'  \code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).
 #' @return Invisibly returns a list with old option settings.
-#' @seealso \code{\link{print_tmlenet_opts}}
+#' @seealso \code{\link{print_densier_opts}}
 #' @export
-tmlenet_options <- function(bin_estimator = speedglmR6$new(),
+densier_options <- function(bin_estimator = speedglmR6$new(),
                             parfit = FALSE,
                             bin.method = c("equal.len", "equal.mass", "dhist"),
                             nbins = NA,
@@ -123,31 +123,31 @@ set.misval <- function(gvars, newmisval) {
 }
 gvars$misfun <- testmisfun()
 
-# Allows tmlenet functions to use e.g., getOption("tmlenet.verbose") to get verbose printing status
+# Allows densier functions to use e.g., getOption("densier.verbose") to get verbose printing status
 .onLoad <- function(libname, pkgname) {
   op <- options()
-  op.tmlenet <- list(
-    tmlenet.verbose = gvars$verbose
+  op.densier <- list(
+    densier.verbose = gvars$verbose
   )
   # reset all options to their defaults on load:
-  tmlenet_options()
+  densier_options()
 
-  toset <- !(names(op.tmlenet) %in% names(op))
-  if(any(toset)) options(op.tmlenet[toset])
+  toset <- !(names(op.densier) %in% names(op))
+  if(any(toset)) options(op.densier[toset])
 
   invisible()
 }
 
 .onAttach <- function(...) {
-  packageStartupMessage('tmlenet')
-  packageStartupMessage('The tmlenet package is still in beta testing. Interpret results with caution.')
-  #   packageStartupMessage('Version: ', utils::packageDescription('tmlenet')$Version)
-  #   packageStartupMessage('Package created on ', utils::packageDescription('tmlenet')$Date, '\n')
+  packageStartupMessage('densier')
+  packageStartupMessage('The densier package is still in beta testing. Interpret results with caution.')
+  #   packageStartupMessage('Version: ', utils::packageDescription('densier')$Version)
+  #   packageStartupMessage('Package created on ', utils::packageDescription('densier')$Date, '\n')
   #   packageStartupMessage('Please note this package is still in its early stages of development.
-   # Check for updates and report bugs at http://github.com/osofr/tmlenet.', '\n')
-  #   packageStartupMessage('To see the vignette use vignette("tmlenet_vignette", package="tmlenet").
-  # To see all available package documentation use help(package = "tmlenet") and ?tmlenet.', '\n')
-  #   packageStartupMessage('To see the latest updates for this version, use news(package = "tmlenet").', '\n')
+   # Check for updates and report bugs at http://github.com/osofr/densier.', '\n')
+  #   packageStartupMessage('To see the vignette use vignette("densier_vignette", package="densier").
+  # To see all available package documentation use help(package = "densier") and ?densier.', '\n')
+  #   packageStartupMessage('To see the latest updates for this version, use news(package = "densier").', '\n')
 }
 
 

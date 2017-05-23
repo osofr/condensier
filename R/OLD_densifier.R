@@ -7,7 +7,7 @@
 # @docType package
 # @author Oleg Sofrygin, Mark J. van der Laan
 
-#' @useDynLib tmlenet
+#' @useDynLib densier
 #' @import R6
 #' @importFrom Rcpp sourceCpp
 #' @importFrom grDevices nclass.FD nclass.Sturges nclass.scott
@@ -19,39 +19,38 @@
 #-----------------------------------------------------------------------------
 # Class Membership Tests
 #-----------------------------------------------------------------------------
-is.DatNet.sWsA <- function(DatNet.sWsA) "DatNet.sWsA"%in%class(DatNet.sWsA)
-is.DatNet <- function(DatNet) "DatNet"%in%class(DatNet)
+is.DataStore <- function(DataStore) "DataStore"%in%class(DataStore)
 
-#-----------------------------------------------------------------------------
-# ALL NETWORK VARIABLE NAMES MUST BE CONSTRUCTED BY CALLING THIS FUNCTION.
-# In the future might return the network variable (column vector) itself.
-# Helper function that for given variable name (varnm) and friend index (fidx)
-# returns the characeter name of that network variable varnm[fidx],
-# for fidx = 0 (var itself), ..., kmax. fidx can be a vector, in which case a
-# character vector of network names is returned. If varnm is also a vector, a
-# character vector for all possible combinations of (varnm x fidx) is returned.
-# OUTPUT format: Varnm_net.j:
-#-----------------------------------------------------------------------------
-netvar <- function(varnm, fidx) {
-  cstr <- function(varnm, fidx) {
-    slen <- length(fidx)
-    rstr <- vector(mode = "character", length = slen)
-    netidxstr <- ! (fidx %in% 0L)
-    rstr[netidxstr] <- stringr::str_c('_netF', fidx[netidxstr])  # vs. 1
-    # rstr[netidxstr] <- str_c('.net.', fidx[netidxstr])  # vs. 2
-    return(stringr::str_c(varnm, rstr))
-  }
-  if (length(varnm) > 1) {
-    return(unlist(lapply(varnm, cstr, fidx)))
-  } else {
-    return(cstr(varnm, fidx))
-  }
-}
-# Examples:
-# netvar("A", (0:5))
-# netvar("A", c(0:5, 0, 3))
-# netvar(c("A", "W"), c(0:5, 0, 3))
-# netvar(c("A", "W"), c(0:5, 0, 3))
+# #-----------------------------------------------------------------------------
+# # ALL NETWORK VARIABLE NAMES MUST BE CONSTRUCTED BY CALLING THIS FUNCTION.
+# # In the future might return the network variable (column vector) itself.
+# # Helper function that for given variable name (varnm) and friend index (fidx)
+# # returns the characeter name of that network variable varnm[fidx],
+# # for fidx = 0 (var itself), ..., kmax. fidx can be a vector, in which case a
+# # character vector of network names is returned. If varnm is also a vector, a
+# # character vector for all possible combinations of (varnm x fidx) is returned.
+# # OUTPUT format: Varnm_net.j:
+# #-----------------------------------------------------------------------------
+# netvar <- function(varnm, fidx) {
+#   cstr <- function(varnm, fidx) {
+#     slen <- length(fidx)
+#     rstr <- vector(mode = "character", length = slen)
+#     netidxstr <- ! (fidx %in% 0L)
+#     rstr[netidxstr] <- stringr::str_c('_netF', fidx[netidxstr])  # vs. 1
+#     # rstr[netidxstr] <- str_c('.net.', fidx[netidxstr])  # vs. 2
+#     return(stringr::str_c(varnm, rstr))
+#   }
+#   if (length(varnm) > 1) {
+#     return(unlist(lapply(varnm, cstr, fidx)))
+#   } else {
+#     return(cstr(varnm, fidx))
+#   }
+# }
+# # Examples:
+# # netvar("A", (0:5))
+# # netvar("A", c(0:5, 0, 3))
+# # netvar(c("A", "W"), c(0:5, 0, 3))
+# # netvar(c("A", "W"), c(0:5, 0, 3))
 
 #-----------------------------------------------------------------------------
 # General utilities / Global Vars
@@ -110,25 +109,7 @@ CheckVarNameExists <- function(data, varname) {
   return(invisible(NULL))
 }
 
-# THIS NEEDS MORE EVALUATION, DOESN'T SEEM TO WORK AS INTENDED DURING MC EVALUTION
-# (GET HUGE ABSOLUTE VALUE WEIGHTS, THAT HAVE tiny % CONTRIBUTION)
-scale_bound <- function(weights, max_npwt, n) {
-  # scale weights
-  weight_prop <- (weights/sum(weights))   # % contribution to the total weight, scaled by n
-  weight_prop_byn <- (weights/sum(weights))*n   # % contribution to the total weight, scaled by n
-  # print("weight summary before trunc"); print(summary(weights))
-  # print("weight_prop before trunc, %"); print(summary(weight_prop))
-  # print("weight_prop before trunc, scaled by n"); print(summary(weight_prop_byn))
 
-  while (any(weight_prop_byn > (max_npwt+5))) {
-    weights[which(weight_prop_byn >= max_npwt)] <- (max_npwt / n) * sum(weights)
-    weight_prop_byn <- (weights/sum(weights)) * n   # % contribution to the total weight, sclaed by n
-    # print("weight summary after trunc"); print(summary(weights))
-    # print("weight_prop after trunc, %"); print(summary(weights/sum(weights)))
-    # print("weight_prop after trunc, scaled by n"); print(summary(weight_prop_byn))
-  }
-  return(weights)
-}
 # Return the left hand side variable of formula f as a character
 LhsVars <- function(f) {
   f <- as.formula(f)
@@ -140,75 +121,8 @@ RhsVars <- function(f) {
   return(all.vars(f[[3]]))
 }
 
-#************************************************
-# TMLEs
-#************************************************
-tmle.update <- function(estnames, Y, off, h_wts, determ.Q, predictQ = TRUE) {
-  QY.star <- NA
-  ctrl <- glm.control(trace = FALSE, maxit = 1000)
-  if ("TMLE_A" %in% estnames) {
-    #************************************************
-    # TMLE A: estimate the TMLE update via univariate ML (epsilon is coefficient for h^*/h) - ONLY FOR NON-DETERMINISTIC SUBSET
-    #************************************************
-    SuppressGivenWarnings(
-      m.Q.star <- speedglm::speedglm.wfit(X = matrix(h_wts, ncol=1), y = Y, family = quasibinomial(), trace = FALSE, maxit = 1000, offset = off),
-      GetWarningsToSuppress(TRUE))
-    m.Q.star.coef <- m.Q.star$coef
-    # m.Q.star.fit <- list(coef = m.Q.star$coef, linkfun = "logit_linkinv", fitfunname = "speedglm")
-    # class(m.Q.star.fit) <- c(class(m.Q.star.fit), c("speedglmS3"))
-
-    # SuppressGivenWarnings(m.Q.star <- glm(Y ~ -1 + h_wts + offset(off), data = data.frame(Y = Y, off = off, h_wts = h_wts),
-    #                                           subset = !determ.Q, family = "quasibinomial", control = ctrl), GetWarningsToSuppress(TRUE))
-    # m.Q.star.coef <- coef(m.Q.star)
-
-    if (predictQ) {
-      QY.star <- Y
-      if (!is.na(m.Q.star.coef)) QY.star <- plogis(off + m.Q.star.coef * h_wts)
-    }
-
-  } else if ("TMLE_B" %in% estnames) {
-    #************************************************
-    # TMLE B: estimate the TMLE update via weighted univariate ML (espsilon is intercept)
-    #************************************************
-    SuppressGivenWarnings(
-      m.Q.star <- speedglm::speedglm.wfit(X = matrix(1L, ncol=1, nrow=length(Y)), y = Y, weights = h_wts, offset = off,
-                                        family = quasibinomial(), trace = FALSE, maxit = 1000),
-      GetWarningsToSuppress(TRUE))
-    # family = binomial()
-    m.Q.star.coef <- m.Q.star$coef
-    # m.Q.star.fit <- list(coef = m.Q.star$coef, linkfun = "logit_linkinv", fitfunname = "speedglm")
-    # class(m.Q.star.fit) <- c(class(m.Q.star.fit), c("speedglmS3"))
-    # SuppressGivenWarnings(m.Q.star <- glm(Y ~ offset(off), data = data.frame(Y = Y, off = off), weights = h_wts,
-                                              # subset = !determ.Q, family = "quasibinomial", control = ctrl), GetWarningsToSuppress(TRUE))
-    # m.Q.star.coef <- coef(m.Q.star)
-
-    if (predictQ) {
-      QY.star <- Y
-      if (!is.na(m.Q.star.coef)) QY.star <- plogis(off + m.Q.star.coef)
-    }
-  }
-  #************************************************
-  # (DISABLED) g_IPTW estimator (based on full likelihood factorization, prod(g^*)/prod(g_N):
-  #************************************************
-  # 02/16/13: IPTW estimator (Y_i * prod_{j \\in Fi} [g*(A_j|c^A)/g0_N(A_j|c^A)])
-  # g_wts <- iptw_est(k = est_params_list$Kmax, data = data, node_l = nodes, m.gN = est_params_list$m.g0N,
-  #                      f.gstar = est_params_list$f.gstar, f.g_args = est_params_list$f.g_args, family = "binomial",
-  #                      NetInd_k = est_params_list$NetInd_k, lbound = est_params_list$lbound, max_npwt = est_params_list$max_npwt,
-  #                      f.g0 = est_params_list$f.g0, f.g0_args = est_params_list$f.g0_args)
-  # Y_IPTW_g <- Y
-  # Y_IPTW_g[!determ.Q] <- Y[!determ.Q] * g_wts[!determ.Q]
-  #************************************************
-  # (DISABLED) g_IPTW-based clever covariate TMLE (based on FULL likelihood factorization), covariate based fluctuation
-  #************************************************
-  # SuppressGivenWarnings(m.Q.star_giptw <- glm(Y ~ -1 + g_wts + offset(off),
-  #                                           data = data.frame(Y = Y, off = off, g_wts = g_wts),
-  #                                           subset = !determ.Q, family = "quasibinomial", control = ctrl),
-  #                                           GetWarningsToSuppress(TRUE))
-  return(list(m.Q.star.coef = m.Q.star.coef, QY.star = QY.star))
-}
-
 #---------------------------------------------------------------------------------
-# Estimate h_bar under g_0 and g* given observed data and vector of c^Y's data is an DatNet.sWsA object
+# Estimate h_bar under g_0 and g* given observed data and vector of c^Y's data is an DataStore object
 #---------------------------------------------------------------------------------
 get_all_ests <- function(estnames, DatNet.ObsP0, est_params_list) {
   #---------------------------------------------------------------------------------
@@ -436,7 +350,7 @@ process_regforms <- function(regforms, sW.map = NULL, sA.map = NULL) {
 #'  \item \code{sW.matrix} - Matrix of evaluated summary measures for \code{sW}.
 #'  \item \code{sA.matrix} - Matrix of evaluated summary measures for \code{sA}.
 #'  \item \code{NETIDmat} - Network ID matrix that can be used for \code{NETIDmat} input argument to \code{tmlenet}.
-#'  \item \code{DatNet.ObsP0} - R6 object of class \code{\link{DatNet.sWsA}} that stores all the summary measures and the network information.
+#'  \item \code{DatNet.ObsP0} - R6 object of class \code{\link{DataStore}} that stores all the summary measures and the network information.
 #'    This object be passed to \code{\link{tmlenet}} as an argument, in which case the arguments already provided to \code{eval.summaries} no
 #'    longer need to be specified to \code{tmlenet}.
 #'  }
@@ -529,7 +443,7 @@ eval.summaries <- function(data, Kmax, sW, sA, IDnode = NULL, NETIDnode = NULL, 
   datnetA <- DatNet$new(netind_cl = netind_cl)
   datnetA$make.sVar(Odata = OdataDT_R6, sVar.object = sA)
 
-  DatNet.ObsP0 <- DatNet.sWsA$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
+  DatNet.ObsP0 <- DataStore$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
 
   OdataDT_R6$sW <- sW
   OdataDT_R6$sA <- sA
@@ -551,7 +465,7 @@ eval.summaries <- function(data, Kmax, sW, sA, IDnode = NULL, NETIDnode = NULL, 
 #' Estimate the average network effect among dependent units with known network structure (in presence of
 #'  interference and/or spillover) using \strong{TMLE} (targeted maximum likelihood estimation), \strong{IPTW}
 #'  (Horvitz-Thompson or the inverse-probability-of-treatment) and \strong{GCOMP} (parametric G-computation formula).
-#' @param DatNet.ObsP0 Instance of class \code{\link{DatNet.sWsA}} returned under the same name by the \code{\link{eval.summaries}} function.
+#' @param DatNet.ObsP0 Instance of class \code{\link{DataStore}} returned under the same name by the \code{\link{eval.summaries}} function.
 #'  Stores the evaluated summary measures (\code{sW},\code{sA}) for the observed data, along with the network information.
 #'  When this argument is specified, the
 #'  following arguments no longer need to be provided: \code{data}, \code{Kmax}, \code{sW}, \code{sA},
@@ -1118,7 +1032,7 @@ tmlenet <- function(DatNet.ObsP0, data, Kmax, sW, sA,
   # Testing NA for visible det.Y and true observed Y as protected:
   # determ.Q <- c(FALSE, FALSE, FALSE, rep(TRUE, length(determ.Q)-3))
   # length(determ.Q) == length(obsYvals)
-  # DatNet.ObsP0 <- DatNet.sWsA$new(datnetW = datnetW, datnetA = datnetA, YnodeVals = obsYvals, det.Y = determ.Q)$make.dat.sWsA()
+  # DatNet.ObsP0 <- DataStore$new(datnetW = datnetW, datnetA = datnetA, YnodeVals = obsYvals, det.Y = determ.Q)$make.dat.sWsA()
   # print("DatNet.ObsP0: "); print(DatNet.ObsP0)
   # print(head(cbind(DatNet.ObsP0$noNA.Ynodevals, DatNet.ObsP0$YnodeVals, data[,node_l$Ynode]), 100))
 

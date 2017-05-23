@@ -33,7 +33,7 @@ This R6 class defines and fits a conditional probability model \code{P(sA[j]|sW,
 \section{Methods}{
 
 \describe{
-  \item{\code{new(reg, DatNet.sWsA.g0, DatNet.sWsA.gstar, ...)}}{...}
+  \item{\code{new(reg, data_object, DataStore.gstar, ...)}}{...}
   \item{\code{fit(data)}}{...}
   \item{\code{predict(newdata)}}{...}
   \item{\code{predictAeqa(newdata)}}{...}
@@ -46,6 +46,6 @@ This R6 class defines and fits a conditional probability model \code{P(sA[j]|sW,
   \item{\code{cats}}{...}
 }
 }
-
 \keyword{R6}
 \keyword{class}
+

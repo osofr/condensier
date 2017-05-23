@@ -152,6 +152,6 @@ names(res)
 head(res$DatNet.ObsP0$dat.sWsA)
 # matrix of network IDs:
 head(res$NETIDmat)
-# Observed data (sW,sA) stored as "DatNet.sWsA" R6 class object:
+# Observed data (sW,sA) stored as "DataStore" R6 class object:
 res$DatNet.ObsP0
 class(res$DatNet.ObsP0)

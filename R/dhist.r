@@ -31,7 +31,7 @@ if(is.character(nbins))
 		# upper and lower corners in the ecdf
 		ylower <- yupper - a/n
 		#
-		cmtx <- cbind(cut(yupper, breaks = ybr), cut(yupper, breaks = 
+		cmtx <- cbind(cut(yupper, breaks = ybr), cut(yupper, breaks =
 			ybr, left.include = T), cut(ylower, breaks = ybr),
 			cut(ylower, breaks = ybr, left.include = T))
 		cmtx[1, 3] <- cmtx[1, 4] <- 1
@@ -111,7 +111,7 @@ if(is.character(nbins))
 	amt.txt<-0
 	end.y<-(-10000)
 	if(plot) {
-		barplot(heights, abs(diff(xbr)), space = 0, density = -1, xlab = 
+		barplot(heights, abs(diff(xbr)), space = 0, density = -1, xlab =
 			xlab, plot = TRUE, xaxt = "n",yaxt='n')
 		at <- pretty(xbr)
 		axis(1, at = at - xbr[1], labels = as.character(at))

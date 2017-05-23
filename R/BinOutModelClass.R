@@ -63,7 +63,7 @@ join.Xmat = function(X_mat, sVar_melt_DT, ID) {
 #'  logistic regression P(Bin|Xmat).
 #'  Can also be used for converting data in wide format to long when requested,
 #'  e.g., when pooling across binary indicators (fitting one pooled logistic regression model for several indicators)
-#'  The class has methods that perform queries to data storage R6 class DatNet.sWsA to get appropriate data columns & row subsets
+#'  The class has methods that perform queries to data storage R6 class DataStore to get appropriate data columns & row subsets
 #'
 #' @docType class
 #' @format An \code{\link{R6Class}} generator object
@@ -145,7 +145,7 @@ BinDat <- R6Class(classname = "BinDat",
     },
 
     newdata = function(newdata, getoutvar = TRUE, ...) {
-      assert_that(is.DatNet.sWsA(newdata))
+      assert_that(is.DataStore(newdata))
       # CALL self$setdata.long() when: 1) self$pool_cont is TRUE & 2) more than one outvars_to_pool
       if (self$pool_cont && length(self$outvars_to_pool)>1) {
         self$setdata.long(data = newdata, ...)
@@ -179,9 +179,9 @@ BinDat <- R6Class(classname = "BinDat",
     },
 
     # Sets X_mat, Yvals, evaluates subset and performs correct subseting of data
-    # everything is performed using data$ methods (data is of class DatNet.sWsA)
+    # everything is performed using data$ methods (data is of class DataStore)
     setdata = function(data, getoutvar, ...) {
-      assert_that(is.DatNet.sWsA(data))
+      assert_that(is.DataStore(data))
       self$n <- data$nobs
       self$subset_idx <- self$define.subset_idx(data)
       if (getoutvar) private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # Always a vector
@@ -189,7 +189,7 @@ BinDat <- R6Class(classname = "BinDat",
         private$X_mat <- matrix(, nrow = 0L, ncol = (length(self$predvars) + 1))
         colnames(private$X_mat) <- c("Intercept", self$predvars)
       } else {
-        # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DatNet.sWsA$get.dat.sWsA() IS MADE ***
+        # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DataStore$get.dat.sWsA() IS MADE ***
         private$X_mat <- as.matrix(cbind(Intercept = 1, data$get.dat.sWsA(self$subset_idx, self$predvars)))
         # To find and replace misvals in X_mat:
         if (self$ReplMisVal0) private$X_mat[gvars$misfun(private$X_mat)] <- gvars$misXreplace
@@ -198,7 +198,7 @@ BinDat <- R6Class(classname = "BinDat",
     },
 
     setdata.long = function(data, ...) {
-      assert_that(is.DatNet.sWsA(data))
+      assert_that(is.DataStore(data))
       self$n <- data$nobs
       self$subset_idx <- self$define.subset_idx(data)
       if (!(data$active.bin.sVar %in% self$outvar)) { stop("currently binirized sVar does not match self$outvar argument") }
@@ -243,7 +243,7 @@ BinDat <- R6Class(classname = "BinDat",
       #   private$X_mat <- matrix(, nrow = 0L, ncol = (length(self$predvars) + 1))
       #   colnames(private$X_mat) <- c("Intercept", self$predvars)
       # } else {
-      #   # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DatNet.sWsA$get.dat.sWsA() IS MADE ***
+      #   # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DataStore$get.dat.sWsA() IS MADE ***
       #   private$X_mat <- as.matrix(cbind(Intercept = 1, data$get.dat.sWsA(self$subset_idx, self$predvars)))
         # To find and replace misvals in X_mat:
         if (self$ReplMisVal0) private$X_mat[gvars$misfun(private$X_mat)] <- gvars$misXreplace
@@ -274,7 +274,7 @@ BinDat <- R6Class(classname = "BinDat",
 #'  logistic regression P(Bin|Xmat).
 #'  Can also be used for converting data in wide format to long when requested,
 #'  e.g., when pooling across binary indicators (fitting one pooled logistic regression model for several indicators)
-#'  The class has methods that perform queries to data storage R6 class DatNet.sWsA to get appropriate data columns & row subsets
+#'  The class has methods that perform queries to data storage R6 class DataStore to get appropriate data columns & row subsets
 #'
 #' @docType class
 #' @format An \code{\link{R6Class}} generator object
@@ -307,7 +307,7 @@ BinDat <- R6Class(classname = "BinDat",
 #'   \item{\code{wipe.alldat}}{...}
 #' }
 #' @importFrom assertthat assert_that is.flag
-#' @include GlmAlgorithmClass.R 
+#' @include GlmAlgorithmClass.R
 #' @export
 BinOutModel  <- R6Class(classname = "BinOutModel",
   # cloneable = FALSE,
@@ -367,7 +367,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
     # take fitted BinOutModel class object as an input and save the fits to itself
     copy.fit = function(bin.out.model) {
       ######################################################################## What to do with this?
-      assert_that("BinOutModel" %in% class(bin.out.model))
+      assert_that(is(bin.out.model, "BinOutModel"))
       private$m.fit <- bin.out.model$getfit
       self$is.fitted <- TRUE
       invisible(self)
@@ -395,7 +395,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
     # take BinOutModel class object that contains the predictions for P(A=1|sW) and save these predictions to self$
     copy.predict = function(bin.out.model) {
       ######################################################################## What to do with this?
-      assert_that("BinOutModel" %in% class(bin.out.model))
+      assert_that(is(bin.out.model, "BinOutModel"))
       assert_that(self$is.fitted)
       private$probA1 <- bin.out.model$getprobA1
     },

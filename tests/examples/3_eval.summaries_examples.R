@@ -32,7 +32,7 @@ head(res$DatNet.ObsP0$dat.sWsA)
 # matrix of network IDs:
 head(res$NETIDmat)
 # Observed data summary measures (sW,sA) and network
-# stored as "DatNet.sWsA" R6 class object:
+# stored as "DataStore" R6 class object:
 res$DatNet.ObsP0
 class(res$DatNet.ObsP0)
 

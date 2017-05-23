@@ -15,7 +15,7 @@ logisfitR6 <- R6Class("logisfitR6",
            if (gvars$verbose) print(paste("calling predict.long for", self$fitfunname))
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
-           assert_that(!is.null(datsum_obj));assert_that(!is.null(X_mat)); 
+           assert_that(!is.null(datsum_obj));assert_that(!is.null(X_mat));
            assert_that(!is.null(datsum_obj$subset_idx))
            assert_that(nrow(X_mat)==length(Y_vals))
 
@@ -59,12 +59,12 @@ logisfitR6 <- R6Class("logisfitR6",
             }
             return(pAout)
          },
- 
+
          fit = function(datsum_obj) {
            if (gvars$verbose) print(paste("calling glm.generic for", self$fitfunname))
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
- 
+
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
              m.fit <- list(coef = rep.int(NA_real_, ncol(X_mat)))

@@ -122,7 +122,6 @@ fit.hbars <- function(DatNet.ObsP0, est_params_list) {
   if (!all(check.sAgstar.exist)) stop("the following outcomes from hform.gstar regression could not be located in sA summary measures: " %+%
                                     paste0(sA_nms_gstar[!check.sAgstar.exist], collapse = ","))
 
-
   ##########################################################
   # *********** SUBSETTING ALGORITHM ***********
   ##########################################################
@@ -136,17 +135,6 @@ fit.hbars <- function(DatNet.ObsP0, est_params_list) {
   #     this should be a list of lists of length equal to the total number of such regressions.
   subsets_expr <- lapply(sA_nms_g0, function(var) lapply(var, function(var) {var}))
   # subsets_expr <- lapply(sA_nms_g0, function(var) {var})
-
-  ##########################################################
-  # **** DEPRECATED **** DEFINING SUBSETING EXPRESSIONS (FOR DETERMINISTIC / DEGENERATE sA)
-  ##########################################################
-  # (1 subset expr per regression P(sA[j]|sA[j-1:0], sW))
-  # Old examples of subsetting expressions:
-  # based on the variable of gvars$misval (requires passing gvars envir for eval)
-  # subset_exprs <- lapply(netvar("determ.g_Friend", c(0:Kmax)), function(var) {var%+%" != "%+%"misval"})
-  # based on existing logical determ_g columns (TRUE = degenerate/determ):
-  # subset_exprs <- lapply(netvar("determ.g_true", c(0:Kmax)), function(var) {var%+%" != "%+%TRUE})
-  #-----------------------------------------------------------
 
   ##########################################################
   # Summary class params:
@@ -166,7 +154,7 @@ fit.hbars <- function(DatNet.ObsP0, est_params_list) {
   p_h0 <- ifelse(is.null(f.g0), 1, ng.MCsims)
   if (!is.null(f.g0)) {
     if (gvars$verbose) message("generating DatNet.g0 under known g0")
-    DatNet.g0 <- DatNet.sWsA$new(Odata = Odata, datnetW = O.datnetW, datnetA = O.datnetA)
+    DatNet.g0 <- DataStore$new(Odata = Odata, datnetW = O.datnetW, datnetA = O.datnetA)
     DatNet.g0$make.dat.sWsA(p = p_h0, f.g_fun = f.g0, sA.object = sA, DatNet.ObsP0 = DatNet.ObsP0)
     if (gvars$verbose) {
       print("new DatNet.g0$dat.sWsA from known g0: "); print(head(DatNet.g0$dat.sWsA))
@@ -182,9 +170,9 @@ fit.hbars <- function(DatNet.ObsP0, est_params_list) {
                                     subset = subsets_expr)
   regclass.g0$S3class <- "generic"
   # using S3 method dispatch on regclass.g0:
-  summeas.g0 <- newsummarymodel(reg = regclass.g0, DatNet.sWsA.g0 = DatNet.g0)
+  summeas.g0 <- newsummarymodel(reg = regclass.g0, DataStore.g0 = DatNet.g0)
 
-  # summeas.g0 <- SummariesModel$new(reg = regclass.g0, DatNet.sWsA.g0 = DatNet.g0)
+  # summeas.g0 <- SummariesModel$new(reg = regclass.g0, DataStore.g0 = DatNet.g0)
   if (!is.null(h_g0_SummariesModel)) {
     # 1) verify h_g0_SummariesModel is consistent with summeas.g0
     assert_that(inherits(h_g0_SummariesModel, "SummariesModel"))
@@ -198,7 +186,7 @@ fit.hbars <- function(DatNet.ObsP0, est_params_list) {
   # NEED TO PASS obsdat.sW.sA (observed data sWsA) to predict() funs.
   # If !is.null(f.g_fun) then DatNet.g0$dat.sWsA IS NOT THE OBSERVED data (sWsA), but rather sWsA data sampled under known g_0.
   # Option 1: Wipe out DatNet.g0$dat.sWsA with actually observed data - means that we can't use DatNet.g0$dat.sWsA in the future.
-  # Option 2: Create a new class DatNet.Obs of DatNet.sWsA (will be painful)
+  # Option 2: Create a new class DatNet.Obs of DataStore (will be painful)
   # Going with OPTION 1 for now:
   # Already generated DatNet.ObsP0 in tmlenet:
   h_gN <- summeas.g0$predictAeqa(newdata = DatNet.ObsP0)
@@ -228,15 +216,15 @@ fit.hbars <- function(DatNet.ObsP0, est_params_list) {
                                         subset = subsets_expr)
   regclass.gstar$S3class <- "generic"
   # Define Intervals Under g_star to Be The Same as under g0:
-  summeas.gstar <- newsummarymodel(reg = regclass.gstar, DatNet.sWsA.g0 = DatNet.g0)
-  # summeas.gstar <- SummariesModel$new(reg = regclass.gstar, DatNet.sWsA.g0 = DatNet.g0)
+  summeas.gstar <- newsummarymodel(reg = regclass.gstar, DataStore.g0 = DatNet.g0)
+  # summeas.gstar <- SummariesModel$new(reg = regclass.gstar, DataStore.g0 = DatNet.g0)
   # Define Intervals Under g_star Based on Summary Measures Generated under g_star:
-  # summeas.gstar <- SummariesModel$new(reg = regclass.gstar, DatNet.sWsA.g0 = DatNet.gstar)
+  # summeas.gstar <- SummariesModel$new(reg = regclass.gstar, DataStore.g0 = DatNet.gstar)
   # Define Intervals Under g_star Based on Union of Summary Measures under g_star and g0:
-  # summeas.gstar <- SummariesModel$new(reg = regclass.gstar, DatNet.sWsA.g0 = DatNet.g0, datnet.gstar = DatNet.gstar)
+  # summeas.gstar <- SummariesModel$new(reg = regclass.gstar, DataStore.g0 = DatNet.g0, datnet.gstar = DatNet.gstar)
 
 
-  DatNet.gstar <- DatNet.sWsA$new(Odata = Odata, datnetW = O.datnetW, datnetA = O.datnetA)
+  DatNet.gstar <- DataStore$new(Odata = Odata, datnetW = O.datnetW, datnetA = O.datnetA)
   # f.g_fun to be replaced with new.sA:
   DatNet.gstar$make.dat.sWsA(p = ng.MCsims, f.g_fun = f.gstar, new.sA.object = new.sA, sA.object = sA, DatNet.ObsP0 = DatNet.ObsP0)
 

@@ -136,7 +136,7 @@ test.catnet.fit.density.iptw <- function() {
     OdataDT_R6 <- OdataDT$new(Odata = datO, nFnode = "nF", iid_data_flag = FALSE)
     datnetW <- DatNet$new(netind_cl = netind_cl, nodes = nodes)$make.sVar(Odata = OdataDT_R6, sVar.object = sW)
     datnetA <- DatNet$new(netind_cl = netind_cl, nodes = nodes)$make.sVar(Odata = OdataDT_R6, sVar.object = sA)
-    datNetObs <- DatNet.sWsA$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
+    datNetObs <- DataStore$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
 
     return(list(datNetObs = datNetObs, netind_cl = netind_cl, sA = sA, sW = sW, nodes = nodes))
   }
@@ -193,13 +193,13 @@ test.catnet.fit.density.iptw <- function() {
                                       parfit = FALSE)
   # -------------------------------------------------------------------------------------------
   # estimating h_g0:
-  summeas.g0 <- SummariesModel$new(reg = regclass.obj, DatNet.sWsA.g0 = nodeobjs.g0$datNetObs)
+  summeas.g0 <- SummariesModel$new(reg = regclass.obj, DataStore.g0 = nodeobjs.g0$datNetObs)
   summeas.g0$fit(data = nodeobjs.g0$datNetObs)
   h_gN <- summeas.g0$predictAeqa(newdata = nodeobjs.g0$datNetObs)
   print("mean(h_gN): " %+% round(mean(h_gN), 5)) # [1] 0.07417"
   # -------------------------------------------------------------------------------------------
   # estimating h_gstar (cont sVar intervals based on observed sA under g0):
-  summeas.gstar <- SummariesModel$new(reg = regclass.obj, DatNet.sWsA.g0 = nodeobjs.g0$datNetObs)
+  summeas.gstar <- SummariesModel$new(reg = regclass.obj, DataStore.g0 = nodeobjs.g0$datNetObs)
   summeas.gstar$fit(data = nodeobjs.gstar$datNetObs)
   h_gstar_obs.sA <- summeas.gstar$predictAeqa(newdata = nodeobjs.g0$datNetObs)
   print("mean(h_gstar_obs.sA): " %+% round(mean(h_gstar_obs.sA), 5)) # 0.0524

@@ -11,16 +11,16 @@ if(FALSE) {
   setwd(".."); setwd(".."); getwd()
   document()
   load_all("./", create = FALSE) # load all R files in /R and datasets in /data. Ignores NAMESPACE:
-  # tmlenet:::debug_set() # SET TO DEBUG MODE
+  # densier:::debug_set() # SET TO DEBUG MODE
 
   setwd("..");
-  install("tmlenet", build_vignettes = FALSE, dependencies = FALSE) # INSTALL W/ devtools:
+  install("densier", build_vignettes = FALSE, dependencies = FALSE) # INSTALL W/ devtools:
 
   # system("echo $PATH") # see the current path env var
-  # system("R CMD Rd2pdf tmlenet")  # just create the pdf manual from help files
+  # system("R CMD Rd2pdf densier")  # just create the pdf manual from help files
 
   getwd()
-  # setwd("./tmlenet"); setwd(".."); getwd()
+  # setwd("./densier"); setwd(".."); getwd()
   devtools::check(args = "--as-cran")
   devtools::check(args = c("--no-vignettes"), build_args = c("--no-build-vignettes")) # runs faster
   # devtools::check() # runs check with devtools
@@ -35,26 +35,26 @@ if(FALSE) {
   # devtools::build(args = "--no-build-vignettes") # build package tarball compacting vignettes
   # devtools::build() # build package tarball
   setwd("..")
-  system("R CMD check --as-cran tmlenet_0.1.0.tar.gz") # check R package tar ball prior to CRAN submission
-      ## system("R CMD check --no-manual --no-vignettes tmlenet") # check without building the pdf manual and not building vignettes
-      ## system("R CMD build tmlenet --no-build-vignettes --as-cran")
-      # system("R CMD build tmlenet --resave-data")
+  system("R CMD check --as-cran densier_0.1.0.tar.gz") # check R package tar ball prior to CRAN submission
+      ## system("R CMD check --no-manual --no-vignettes densier") # check without building the pdf manual and not building vignettes
+      ## system("R CMD build densier --no-build-vignettes --as-cran")
+      # system("R CMD build densier --resave-data")
   # devtools::use_travis() # SET UP TRAVIS CONFIG FILE
   # INSTALLING FROM SOURCE:
-  # install.packages("./tmlenet_0.2.0.tar.gz", repos = NULL, type="source", dependencies=TRUE)
-  # library(tmlenet)
-  # tmlenet:::debug_set() # SET TO DEBUG MODE
-  # tmlenet:::debug_off() # SET DEBUG MODE OFF
+  # install.packages("./densier_0.2.0.tar.gz", repos = NULL, type="source", dependencies=TRUE)
+  # library(densier)
+  # densier:::debug_set() # SET TO DEBUG MODE
+  # densier:::debug_off() # SET DEBUG MODE OFF
 
   # To install a specific branch:
   # devtools::install_github('osofr/simcausal', ref = "simnet", build_vignettes = FALSE)
-  # devtools::install_github('osofr/tmlenet', ref = "master", build_vignettes = FALSE)
+  # devtools::install_github('osofr/densier', ref = "master", build_vignettes = FALSE)
 
   # TEST COVERATE:
   # if your working directory is in the packages base directory
   # package_coverage()
   # or a package in another directory
-  # cov <- package_coverage("tmlenet")
+  # cov <- package_coverage("densier")
   # view results as a data.frame
   # as.data.frame(cov)
   # zero_coverage() can be used to filter only uncovered lines.
@@ -113,28 +113,28 @@ test.nullnodesbug <- function() {
   # When is.null(DatNet$nodes) no checks are made and regression is attempted anyways
   # results in uninterpretable errror
   # ....................................
-  # Fixed by setting DatNet.sWsA$get.outvar to throw an error when outvar is not found
+  # Fixed by setting DataStore$get.outvar to throw an error when outvar is not found
   # ....................................
 }
 
 test.opts.misfun.chkpkgs <- function() {
-  checkException(old_opts <- tmlenet_options(bin.method = "blah"))
+  checkException(old_opts <- densier_options(bin.method = "blah"))
 
-  funmiss <- tmlenet:::testmisfun()
+  funmiss <- densier:::testmisfun()
   checkTrue(funmiss(NA))
-  checkTrue(is.na(tmlenet:::get.misval()))
+  checkTrue(is.na(densier:::get.misval()))
 
-  tmlenet:::set.misval(tmlenet:::gvars, NaN)
-  checkTrue(is.nan(tmlenet:::gvars$misval))
-  tmlenet:::set.misval(tmlenet:::gvars, NA)
-  checkTrue(is.na(tmlenet:::gvars$misval))
+  densier:::set.misval(densier:::gvars, NaN)
+  checkTrue(is.nan(densier:::gvars$misval))
+  densier:::set.misval(densier:::gvars, NA)
+  checkTrue(is.na(densier:::gvars$misval))
 
-  checkException(tmlenet:::checkpkgs("blahblah"))
+  checkException(densier:::checkpkgs("blahblah"))
 
-  warns <- tmlenet:::GetWarningsToSuppress()
+  warns <- densier:::GetWarningsToSuppress()
 
   testdat <- data.frame(a = rnorm(5), b = rep("str", 5), stringsAsFactors=TRUE)
-  checkTrue(tmlenet:::CheckExistFactors(data = testdat)%in%"b")
+  checkTrue(densier:::CheckExistFactors(data = testdat)%in%"b")
 }
 
 # making bin indicator matrix from ordinal sVar:
@@ -144,7 +144,7 @@ test.makebins.fromord <- function() {
   nbins <- length(unique(ord_vec_1))
   # levels <- sort(unique(ord_vec_1))
   bin.nms <- "B_"%+%(1:nbins)
-  bin_ord_vec_1 <- tmlenet:::make.bins_mtx_1(ord_vec_1, nbins = nbins, bin.nms = bin.nms)
+  bin_ord_vec_1 <- densier:::make.bins_mtx_1(ord_vec_1, nbins = nbins, bin.nms = bin.nms)
   out_mat_1 <- cbind(ord_vec_1 = ord_vec_1, bin_ord_vec_1)
 
   # testing bin indicator matrix for ordinal variable that's not in standard range 1:nbins
@@ -152,7 +152,7 @@ test.makebins.fromord <- function() {
   nbins <- length(unique(ord_vec_2))
   levels <- sort(unique(ord_vec_2))
   bin.nms <- "B_"%+%levels
-  bin_ord_vec_2 <- tmlenet:::make.bins_mtx_1(ord_vec_2, nbins = nbins, bin.nms = bin.nms, levels = levels)
+  bin_ord_vec_2 <- densier:::make.bins_mtx_1(ord_vec_2, nbins = nbins, bin.nms = bin.nms, levels = levels)
   out_mat_2 <- cbind(ord_vec_2 = ord_vec_2, bin_ord_vec_2)
 }
 
@@ -172,7 +172,7 @@ get.testDat <- function(nsamp = 100000) {
   datO <- sim(D, n = nsamp, rndseed = 12345)
 }
 
-# helper function for generating network and tmlenet data storage objects
+# helper function for generating network and densier data storage objects
 get.testDatNet <- function(datO) {
   Kmax <- 1
   nodes <- list(Anode = "sA", Wnodes = c("W1", "W2", "W3"), nFnode = "nF")
@@ -183,13 +183,13 @@ get.testDatNet <- function(datO) {
   OdataDT_R6 <- OdataDT$new(Odata = datO, nFnode = "nF", iid_data_flag = FALSE)
   datnetW <- DatNet$new(Odata = OdataDT_R6, netind_cl = netind_cl, nodes = nodes)$make.sVar(Odata = OdataDT_R6, sVar.object = sW)
   datnetA <- DatNet$new(Odata = OdataDT_R6, netind_cl = netind_cl, nodes = nodes)$make.sVar(Odata = OdataDT_R6, sVar.object = sA)
-  datNetObs <- DatNet.sWsA$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
+  datNetObs <- DataStore$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
   return(list(datNetObs = datNetObs, netind_cl = netind_cl, sA = sA, sW = sW, nodes = nodes))
 }
 
 test.RegressionClass <- function() {
   # Tests for RegressionClass:
-  reg_test1 <- RegressionClass$new(outvar.class = c(tmlenet:::gvars$sVartypes$bin, tmlenet:::gvars$sVartypes$bin),
+  reg_test1 <- RegressionClass$new(outvar.class = c(densier:::gvars$sVartypes$bin, densier:::gvars$sVartypes$bin),
                                   outvar = c("A1", "A2"),
                                   predvars = c("W1", "W2"))
   class(reg_test1)
@@ -201,7 +201,7 @@ test.RegressionClass <- function() {
   # [1] "P(A2|A1,W1,W2)"
   checkTrue("BinOutModel" %in% class(model1$getPsAsW.models()$`P(sA|sW).1`))
 
-  reg_test2 <- RegressionClass$new(outvar.class = c(tmlenet:::gvars$sVartypes$bin, tmlenet:::gvars$sVartypes$bin),
+  reg_test2 <- RegressionClass$new(outvar.class = c(densier:::gvars$sVartypes$bin, densier:::gvars$sVartypes$bin),
                                   outvar = c("A1", "A2"),
                                   predvars = c("W1", "W2"),
                                   subset = list("A1"))
@@ -210,11 +210,11 @@ test.RegressionClass <- function() {
   model2 <- SummariesModel$new(reg = reg_test2)
 
   checkException(
-    reg_test3 <- RegressionClass$new(outvar.class = c(tmlenet:::gvars$sVartypes$cont, tmlenet:::gvars$sVartypes$cont),
+    reg_test3 <- RegressionClass$new(outvar.class = c(densier:::gvars$sVartypes$cont, densier:::gvars$sVartypes$cont),
                                     outvar = c("sA"), predvars = c("W1", "W2", "W3"),
                                     subset = list(quote(sA==0)))
     )
-  reg_test3 <- RegressionClass$new(outvar.class = tmlenet:::gvars$sVartypes$cont,
+  reg_test3 <- RegressionClass$new(outvar.class = densier:::gvars$sVartypes$cont,
                                   outvar = c("sA"), predvars = c("W1", "W2", "W3"),
                                   subset = list("sA"))
                                   # subset = list(quote(sA==0)))
@@ -237,7 +237,7 @@ test.RegressionClass <- function() {
                                                       max_nperbin = reg_test3$max_nperbin)
 
   class(reg_test3$subset[[1]])
-  model3 <- SummariesModel$new(reg = reg_test3, DatNet.sWsA.g0 = nodeobjs$datNetObs)
+  model3 <- SummariesModel$new(reg = reg_test3, DataStore.g0 = nodeobjs$datNetObs)
 }
 
 
@@ -246,7 +246,7 @@ test.RegressionClass <- function() {
 # Tries to add "TRUE" to the current bin indicator name: self$subset_expr = c("sA_B.1", "TRUE")
 # ------------------------------------------------------------------------------------------------
 test.butregquote <- function() {
-  gvars <- tmlenet:::gvars
+  gvars <- densier:::gvars
   reg_test <- RegressionClass$new(outvar.class = c(gvars$sVartypes$cont),
                                   outvar = c("sA"),
                                   predvars = c("W1", "W2", "W3"),
@@ -254,7 +254,7 @@ test.butregquote <- function() {
   datO <- get.testDat(nsamp = 1000)
   nodeobjs <- get.testDatNet(datO)
   datNetObs <- nodeobjs$datNetObs
-  model3 <- SummariesModel$new(reg = reg_test, DatNet.sWsA.g0 = nodeobjs$datNetObs)
+  model3 <- SummariesModel$new(reg = reg_test, DataStore.g0 = nodeobjs$datNetObs)
 
   model3$getPsAsW.models()[[1]]$getPsAsW.models()
   model3$getPsAsW.models()[[1]]$reg$subset
@@ -269,7 +269,7 @@ test.butregquote <- function() {
 # ------------------------------------------------------------------------------------------------
 test.PoolContRegression <- function() {
   # require(data.table)
-  # gvars <- tmlenet:::gvars
+  # gvars <- densier:::gvars
   # reg_test <- RegressionClass$new(outvar.class = c(gvars$sVartypes$cont),
   #                                 outvar = c("sA"),
   #                                 predvars = c("W1", "W2", "W3"),
@@ -279,8 +279,8 @@ test.PoolContRegression <- function() {
   # datO <- get.testDat(nsamp = 1000)
   # nodeobjs <- get.testDatNet(datO)
   # datNetObs <- nodeobjs$datNetObs
-  # class(datNetObs) # [1] "DatNet.sWsA" "DatNet"      "R6"
-  # model3 <- SummariesModel$new(reg = reg_test, DatNet.sWsA.g0 = nodeobjs$datNetObs)
+  # class(datNetObs) # [1] "DataStore" "DatNet"      "R6"
+  # model3 <- SummariesModel$new(reg = reg_test, DataStore.g0 = nodeobjs$datNetObs)
   # # Matrix of all summary measures: (sW,sA)
   # head(nodeobjs$datNetObs$mat.sVar); class(nodeobjs$datNetObs$mat.sVar)
   # head(datNetObs$mat.bin.sVar)
@@ -336,11 +336,11 @@ test.PoolContRegression <- function() {
 ## ---------------------------------------------------------------------
 test.intervals <- function() {
   test_mat <- as.matrix(data.frame(a = c(0,1,0,0,1), b = rep(5,5), c = c(1,2,3,4,5), d = rnorm(5)))
-  correct.types <- list(a = tmlenet:::gvars$sVartypes$bin,
-                        b = tmlenet:::gvars$sVartypes$bin,
-                        c = tmlenet:::gvars$sVartypes$cat,
-                        d = tmlenet:::gvars$sVartypes$cont)
-  out.types <- tmlenet:::detect.col.types(test_mat)
+  correct.types <- list(a = densier:::gvars$sVartypes$bin,
+                        b = densier:::gvars$sVartypes$bin,
+                        c = densier:::gvars$sVartypes$cat,
+                        d = densier:::gvars$sVartypes$cont)
+  out.types <- densier:::detect.col.types(test_mat)
   checkTrue(all.equal(correct.types, out.types))
 
   # ------------------------------------------------------------------------------
@@ -378,13 +378,13 @@ test.intervals <- function() {
   # binning by equal length
   int_bylen <- c(0, 0.1, 0.9, 1)
   ord1 <- findInterval(x = binvar, vec = int_bylen, rightmost.closed = TRUE)
-  bins_1 <- tmlenet:::make.bins_mtx_1(x.ordinal = ord1, nbins = nbins, bin.nms = "B_"%+%1:nbins)
+  bins_1 <- densier:::make.bins_mtx_1(x.ordinal = ord1, nbins = nbins, bin.nms = "B_"%+%1:nbins)
   cbind(binvar = binvar, ord1 = ord1, bins_1)
 
   # binning by equal mass
   int_bymass <- quantile(binvar, prob = c(0, 0.1, 0.9, 1))
   ord2 <- findInterval(x = binvar, vec = int_bymass, rightmost.closed = TRUE)
-  bins_2 <- tmlenet:::make.bins_mtx_1(x.ordinal = ord1, nbins = nbins, bin.nms = "B_"%+%1:nbins)
+  bins_2 <- densier:::make.bins_mtx_1(x.ordinal = ord1, nbins = nbins, bin.nms = "B_"%+%1:nbins)
   cbind(binvar = binvar, ord2 = ord2, bins_2)
 }
 
@@ -394,7 +394,7 @@ test.intervals <- function() {
 # ------------------------------------------------------------------------------
 test.detect.int.sA <- function() {
   nsamp <- 1000
-  gvars <- tmlenet:::gvars
+  gvars <- densier:::gvars
   # reg_test <- RegressionClass$new(outvar.class = c(gvars$sVartypes$cont),
   #                                 outvar = c("sA"),
   #                                 predvars = c("W1", "W2", "W3"),
@@ -430,13 +430,13 @@ test.detect.int.sA <- function() {
     OdataDT_R6 <- OdataDT$new(Odata = datO, nFnode = "nF", iid_data_flag = FALSE)
     datnetW <- DatNet$new(Odata = OdataDT_R6, netind_cl = netind_cl, nodes = nodes)$make.sVar(Odata = OdataDT_R6, sVar.object = sW)
     datnetA <- DatNet$new(Odata = OdataDT_R6, netind_cl = netind_cl, nodes = nodes)$make.sVar(Odata = OdataDT_R6, sVar.object = sA)
-    datNetObs <- DatNet.sWsA$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
+    datNetObs <- DataStore$new(Odata = OdataDT_R6, datnetW = datnetW, datnetA = datnetA)$make.dat.sWsA()
     return(datNetObs)
   }
 
   print("Binning by mass")
   nbins <- 10
-  oldopts <- tmlenet_options(maxncats = 5, nbins = nbins)
+  oldopts <- densier_options(maxncats = 5, nbins = nbins)
 
   # ----------------------------------------------------------------------------------------
   # Continuous
@@ -475,7 +475,7 @@ test.detect.int.sA <- function() {
   # Categorical w maxncats < ncats, so gets detected as contin and categories get collapsed
   # ----------------------------------------------------------------------------------------
   datNetObs <- makedat(nsamp=nsamp, Kmax=10)
-  tmlenet_options(maxncats = 5, nbins = 10)
+  densier_options(maxncats = 5, nbins = 10)
   obsdat.sW <- datNetObs$datnetW$dat.sVar
   head(obsdat.sW,10)
   head(datNetObs$netind_cl$NetInd, 10)
@@ -524,7 +524,7 @@ test.detect.int.sA <- function() {
   defints3e
   # [1] -1000.000000     0.000000     1.833333     3.666667     5.500000     7.333333     9.166667    11.000000  1011.000000
 
- do.call(tmlenet_options, oldopts)
+ do.call(densier_options, oldopts)
 }
 
 test.NetIndClassFromString <- function() {

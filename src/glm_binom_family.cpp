@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 // replacing .Call(stats:::"C_logit_linkinv", eta) with a C++ function
-// to compile: sourceCpp("/Users/olegsofrygin/GoogleDrive/Network_TMLE/TMLENET_package/tmlenet/glm_binom_family.cpp")
+// to compile: sourceCpp("../tmlenet/glm_binom_family.cpp")
 
 #define DOUBLE_EPS     DBL_EPSILON
 
