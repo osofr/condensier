@@ -3,6 +3,7 @@ Title: Non-Parametric Conditional Density Estimation
 Version: 0.0.1
 Authors@R: c(
     person("Oleg", "Sofrygin", role=c("aut", "cre"), email="oleg.sofrygin@gmail.com"),
+    person("Frank", "Blaauw", role="aut", email="f.j.blaauw@rug.nl"),
     person("Antoine", "Chambaz", role="aut", email="achambaz@u-paris10.fr"),
     person(c("Mark", "J."), "van der Laan", role="aut", email="laan@berkeley.edu"))
 Description: TBD
