@@ -166,7 +166,7 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
     },
 
     update = function(newdata) {
-      assert_that(is.DatNet.sWsA(newdata))
+      #assert_that(is.DatNet.sWsA(newdata))
       newdata$binirize.sVar(name.sVar = self$outvar,
                             intervals = self$intrvls,
                             nbins = self$reg$nbins, bin.nms = self$reg$bin_nms)

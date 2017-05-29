@@ -50,7 +50,9 @@ logisfitR6 <- R6Class("logisfitR6",
          predict = function(datsum_obj, m.fit) {
             if (gvars$verbose) print(paste("calling predict for", self$fitfunname))
             X_mat <- datsum_obj$getXmat
-            assert_that(!is.null(X_mat)); assert_that(!is.null(datsum_obj$subset_idx))
+            assert_that(!is.null(X_mat))
+            assert_that(!is.null(datsum_obj$subset_idx))
+            assert_that(!is.null(m.fit))
             # Set to default missing value for A[i] degenerate/degerministic/misval:
             # Alternative, set to default replacement val: pAout <- rep.int(gvars$misXreplace, newdatsum_obj$n)
             pAout <- rep.int(gvars$misval, datsum_obj$n)
@@ -86,7 +88,10 @@ logisfitR6 <- R6Class("logisfitR6",
             } else {
               m.fit <- private$do.update(X_mat, Y_vals, m.fit)
             }
-            return(m.fit)
+            fit <- list(coef = m.fit, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
+            if (gvars$verbose) print(fit$coef)
+            class(fit) <- c(class(fit), c(self$lmclass))
+            return(fit)
           }
          ),
   active =

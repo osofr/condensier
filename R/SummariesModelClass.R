@@ -114,7 +114,7 @@ SummariesModel <- R6Class(classname = "SummariesModel",
 
 
     update = function(newdata) {
-      assert_that(is.DatNet.sWsA(newdata))
+      #assert_that(is.DatNet.sWsA(newdata))
       #TODO: This should probably be combined with the fit function
       # serial loop over all regressions in PsAsW.models:
       if (!self$parfit_allowed) {
