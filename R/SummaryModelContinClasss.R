@@ -165,6 +165,14 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
       invisible(self)
     },
 
+    update = function(newdata) {
+      assert_that(is.DatNet.sWsA(newdata))
+      newdata$binirize.sVar(name.sVar = self$outvar,
+                            intervals = self$intrvls,
+                            nbins = self$reg$nbins, bin.nms = self$reg$bin_nms)
+      super$update(newdata)
+    },
+
     # Convert contin. sA vector into matrix of binary cols, then call parent class method: super$predictAeqa()
     # Invisibly return cumm. prob P(sA=sa|sW=sw)
     predictAeqa = function(newdata) { # P(A^s=a^s|W^s=w^s) - calculating the likelihood for obsdat.sA[i] (n vector of a`s)

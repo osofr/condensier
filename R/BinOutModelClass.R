@@ -349,6 +349,14 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       invisible(self)
     },
 
+    update = function(newdata, ...) {
+      assert_that(self$is.fitted)
+      self$bindat$newdata(newdata = newdata, ...) # populate bindat with X_mat & Y_vals
+      private$m.fit <- self$binfitalgorithm$update(datsum_obj = self$bindat, private$m.fit) # private$m.fit <- data_obj$logisfit or private$m.fit <- data_obj$logisfit()
+      self$wipe.alldat
+      invisible(self)
+    },
+
     fit = function(overwrite = FALSE, data, ...) { # Move overwrite to a field? ... self$overwrite
       if (!overwrite) assert_that(!self$is.fitted) # do not allow overwrite of prev. fitted model unless explicitely asked
       self$bindat$newdata(newdata = data, ...) # populate bindat with X_mat & Y_vals

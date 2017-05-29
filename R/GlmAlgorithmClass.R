@@ -67,15 +67,27 @@ logisfitR6 <- R6Class("logisfitR6",
 
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
-             m.fit <- list(coef = rep.int(NA_real_, ncol(X_mat)))
+             m.fit <- rep.int(NA_real_, ncol(X_mat))
            } else {
              m.fit <- private$do.fit(X_mat, Y_vals)
            }
-           fit <- list(coef = m.fit$coef, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
+           fit <- list(coef = m.fit, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
            if (gvars$verbose) print(fit$coef)
            class(fit) <- c(class(fit), c(self$lmclass))
            return(fit)
-         }
+         },
+
+         update = function(datsum_obj, m.fit) {
+            if (gvars$verbose) print(paste("calling update for", self$fitfunname))
+            X_mat <- datsum_obj$getXmat
+            Y_vals <- datsum_obj$getY
+            if (nrow(X_mat) == 0L) {
+              m.fit <- rep.int(NA_real_, ncol(X_mat))
+            } else {
+              m.fit <- private$do.update(X_mat, Y_vals, m.fit)
+            }
+            return(m.fit)
+          }
          ),
   active =
     list(
@@ -102,10 +114,12 @@ logisfitR6 <- R6Class("logisfitR6",
 
         do.predict = function(X_mat, m.fit) {
           stop('Override this function in a subclass')
+          eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
+          match.fun(FUN = m.fit$linkfun)(eta)
         },
 
-        update = function() {
-          stop('Override this function in a subclass')
+        do.update = function() {
+          stop('The used method does not support updating!')
         }
 
     )
@@ -139,14 +153,14 @@ glmR6 <- R6Class("glmR6",
           #   return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
           # }, GetWarningsToSuppress())
           suppressWarnings({
-            return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
+            return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl)$coef)
           })
-        },
-
-        do.predict = function(X_mat, m.fit) {
-          eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
-          match.fun(FUN = m.fit$linkfun)(eta)
         }
+
+        #do.predict = function(X_mat, m.fit) {
+          #eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
+          #match.fun(FUN = m.fit$linkfun)(eta)
+        #}
     )
 )
 
@@ -176,12 +190,7 @@ speedglmR6 <- R6Class("speedglmR6",
             if (gvars$verbose) message("speedglm::speedglm.wfit failed, falling back on stats:glm.fit; ", m.fit)
             return(private$fallback_function(X_mat, Y_vals))
           }
-          return(m.fit)
-        },
-
-        do.predict = function(X_mat, m.fit) {
-          eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
-          match.fun(FUN = m.fit$linkfun)(eta)
+          return(m.fit$coef)
         }
     )
 )
