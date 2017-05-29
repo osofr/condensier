@@ -118,7 +118,6 @@ logisfitR6 <- R6Class("logisfitR6",
         },
 
         do.predict = function(X_mat, m.fit) {
-          stop('Override this function in a subclass')
           eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
           match.fun(FUN = m.fit$linkfun)(eta)
         },
