@@ -62,16 +62,15 @@ logisfitR6 <- R6Class("logisfitR6",
             return(pAout)
          },
 
-         fit = function(datsum_obj) {
-           if (gvars$verbose) print(paste("calling glm.generic for", self$fitfunname))
+         fit = function(datsum_obj, fn = private$do.fit, ...) {
+           if (gvars$verbose) print(paste("calling fit / update for", self$fitfunname))
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
-
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
              m.fit <- rep.int(NA_real_, ncol(X_mat))
            } else {
-             m.fit <- private$do.fit(X_mat, Y_vals)
+             m.fit <- fn(X_mat, Y_vals, ...)
            }
            fit <- list(coef = m.fit, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
            if (gvars$verbose) print(fit$coef)
@@ -80,18 +79,7 @@ logisfitR6 <- R6Class("logisfitR6",
          },
 
          update = function(datsum_obj, m.fit) {
-            if (gvars$verbose) print(paste("calling update for", self$fitfunname))
-            X_mat <- datsum_obj$getXmat
-            Y_vals <- datsum_obj$getY
-            if (nrow(X_mat) == 0L) {
-              m.fit <- rep.int(NA_real_, ncol(X_mat))
-            } else {
-              m.fit <- private$do.update(X_mat, Y_vals, m.fit)
-            }
-            fit <- list(coef = m.fit, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
-            if (gvars$verbose) print(fit$coef)
-            class(fit) <- c(class(fit), c(self$lmclass))
-            return(fit)
+           self$fit(datsum_obj, fn = private$do.update, m.fit = m.fit)
           }
          ),
   active =
@@ -119,7 +107,17 @@ logisfitR6 <- R6Class("logisfitR6",
 
         do.predict = function(X_mat, m.fit) {
           eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
-          match.fun(FUN = m.fit$linkfun)(eta)
+          result = tryCatch({
+            match.fun(FUN = m.fit$linkfun)(eta)
+          }, error = function(e) {
+            # If for some reason we are not able to call the fast function, fall back to the slow function
+            if (m.fit$linkfun == 'logit_linkinv') {
+              qlogis(eta)
+            } else {
+              stop(e)
+            }
+          })
+          return(result)
         },
 
         do.update = function() {
