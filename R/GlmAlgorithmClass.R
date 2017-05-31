@@ -57,7 +57,10 @@ logisfitR6 <- R6Class("logisfitR6",
             # Alternative, set to default replacement val: pAout <- rep.int(gvars$misXreplace, newdatsum_obj$n)
             pAout <- rep.int(gvars$misval, datsum_obj$n)
             if (sum(datsum_obj$subset_idx > 0)) {
-              pAout[datsum_obj$subset_idx] <- private$do.predict(X_mat = X_mat, m.fit = m.fit)
+              result <- ifelse(m.fit$has_failed,
+                               private$default_predict(X_mat, m.fit),
+                               private$do.predict(X_mat, m.fit))
+              pAout[datsum_obj$subset_idx] <- result
             }
             return(pAout)
          },
@@ -66,19 +69,41 @@ logisfitR6 <- R6Class("logisfitR6",
            if (gvars$verbose) print(paste("calling fit / update for", self$fitfunname))
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
+           has_failed <- FALSE
+
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
              m.fit <- rep.int(NA_real_, ncol(X_mat))
+             has_failed <- TRUE
            } else {
-             m.fit <- fn(X_mat, Y_vals, ...)
+            m.fit <- try(m.fit <- fn(X_mat, Y_vals, ...), silent = TRUE)
+
+            # If an algorithm fails, we fall back to the fallback function (which is generally the glm function.
+            # Cases where this happens include empty bins, constant bins, or bins with a single outcome
+            if (inherits(m.fit, "try-error")) {
+              if (gvars$verbose) message(self$fitfunname, "failed, falling back on stats:glm.fit; ", m.fit)
+              m.fit <- private$fallback_function(X_mat, Y_vals)
+              has_failed <- TRUE
+            }
+
            }
-           fit <- list(coef = m.fit, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
+           fit <- list(coef = m.fit,
+                       linkfun = "logit_linkinv",
+                       fitfunname = self$fitfunname,
+                       has_failed = has_failed)
+
            if (gvars$verbose) print(fit$coef)
            class(fit) <- c(class(fit), c(self$lmclass))
            return(fit)
          },
 
          update = function(datsum_obj, m.fit) {
+           if (m.fit$has_failed) {
+            # TODO: We have to deal with this in some way. If the calling algorithm is online, and the method had
+            # failes earlier, this will cause trouble. GLM is not online at the moment, and will therefore just refit.
+            # which is pretty subobtimal. 
+            self$fit(datsum_obj, fn = private$do.fit)
+           }
            self$fit(datsum_obj, fn = private$do.update, m.fit = m.fit)
           }
          ),
@@ -101,11 +126,13 @@ logisfitR6 <- R6Class("logisfitR6",
         ),
   private =
     list(
+        fallback_function = NULL,
+
         do.fit = function(X_mat, Y_vals) {
           stop('Override this function in a subclass')
         },
 
-        do.predict = function(X_mat, m.fit) {
+        default_predict = function(X_mat, m.fit) {
           eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
           result = tryCatch({
             match.fun(FUN = m.fit$linkfun)(eta)
@@ -118,6 +145,10 @@ logisfitR6 <- R6Class("logisfitR6",
             }
           })
           return(result)
+        },
+
+        do.predict = function(X_mat, m.fit) {
+          private$default_predict(X_mat, m.fit)
         },
 
         do.update = function() {
@@ -183,16 +214,12 @@ speedglmR6 <- R6Class("speedglmR6",
         ),
   private =
     list(
-        fallback_function = glmR6$new()$get_fit_function,
-
         do.fit = function(X_mat, Y_vals) {
           # , maxit=1000
-          m.fit <- try(suppressWarnings(speedglm::speedglm.wfit(X = X_mat, y = Y_vals, family = binomial(), trace = FALSE, method='Cholesky')), silent = TRUE)
-          if (inherits(m.fit, "try-error")) { # if failed, fall back on stats::glm
-            if (gvars$verbose) message("speedglm::speedglm.wfit failed, falling back on stats:glm.fit; ", m.fit)
-            return(private$fallback_function(X_mat, Y_vals))
-          }
-          return(m.fit$coef)
+            suppressWarnings(
+              m.fit <- speedglm::speedglm.wfit(X = X_mat, y = Y_vals, family = binomial(), trace = FALSE, method='Cholesky')$coef
+            )
+
         }
     )
 )
