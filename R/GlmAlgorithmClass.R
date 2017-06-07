@@ -82,7 +82,7 @@ logisfitR6 <- R6Class("logisfitR6",
             # Cases where this happens include empty bins, constant bins, or bins with a single outcome
             if (inherits(m.fit, "try-error")) {
               if (gvars$verbose) message(self$fitfunname, "failed, falling back on stats:glm.fit; ", m.fit)
-              m.fit <- private$fallback_function(X_mat, Y_vals)
+              m.fit <- private$get_fallback_function()(X_mat, Y_vals)
               has_failed <- TRUE
             }
 
@@ -127,6 +127,14 @@ logisfitR6 <- R6Class("logisfitR6",
   private =
     list(
         fallback_function = NULL,
+
+        get_fallback_function = function() {
+          # Make sure we don't initialize a new object for every call to this fallback method
+          if (is.null(private$fallback_function)) {
+            private$fallback_function <- glmR6$new()$get_fit_function
+          }
+          private$fallback_function
+        },
 
         do.fit = function(X_mat, Y_vals) {
           stop('Override this function in a subclass')
