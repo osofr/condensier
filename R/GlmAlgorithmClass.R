@@ -147,7 +147,8 @@ logisfitR6 <- R6Class("logisfitR6",
           }, error = function(e) {
             # If for some reason we are not able to call the fast function, fall back to the slow function
             if (m.fit$linkfun == 'logit_linkinv') {
-              qlogis(eta)
+              # Use expit (== plogis) to convert the outcome from log odds to probabilities.
+              plogis(eta)
             } else {
               stop(e)
             }

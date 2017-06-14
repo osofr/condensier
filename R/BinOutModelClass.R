@@ -457,6 +457,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
         assert_that(is.integerish(indA)) # check that obsdat.sA is always a vector of of integers
         assert_that(!any(is.na(probA1[self$getsubset]))) # check that predictions P(A=1 | dmat) exist for all obs.
         probA1 <- probA1[self$getsubset]
+
         # DISCRETE VERSION FOR THE JOINT DENSITY:
         probAeqa[self$getsubset] <- probA1^(indA) * (1 - probA1)^(1L - indA)
         # continuous version for the joint density:
@@ -476,6 +477,9 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       self$wipe.alldat
       # private$probAeqa <- probAeqa # NOTE disabling internal saving of probAeqa
       # **********************************************************************
+
+      # frbl: Should we check this? Currently it won't be correct, but we might want to have probabilities that sum to one?
+      #assert_that(!any(probAeqa > 1)) # check that no predictions are greater than one
       return(probAeqa)
     },
 

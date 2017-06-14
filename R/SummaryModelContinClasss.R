@@ -177,10 +177,19 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
     # Invisibly return cumm. prob P(sA=sa|sW=sw)
     predictAeqa = function(newdata) { # P(A^s=a^s|W^s=w^s) - calculating the likelihood for obsdat.sA[i] (n vector of a`s)
       assert_that(is.DataStore(newdata))
-      newdata$binirize.sVar(name.sVar = self$outvar, intervals = self$intrvls, nbins = self$reg$nbins, bin.nms = self$reg$bin_nms)
+      newdata$binirize.sVar(name.sVar = self$outvar, intervals = self$intrvls,
+                            nbins = self$reg$nbins, bin.nms = self$reg$bin_nms)
       if (gvars$verbose) print("performing prediction for categorical outcome: " %+% self$outvar)
       bws <- newdata$get.sVar.bw(name.sVar = self$outvar, intervals = self$intrvls)
+
+      # frbl: The original code stated this:
+      # self$bin_weights <- (1 / bws) # weight based on 1 / (sVar bin widths)
+      # However, if we do that, the weights can become > 1 (at least in the case of specifying a number of bins).
+      # This causes the end result (the probabilities) to become > 1, which is probably not what we want, right?
+      # Why was this here?
+      # The commit in which it was added is: c9033e7231ec2ff35c8f47f1d344531ead6b80a8
       self$bin_weights <- (1 / bws) # weight based on 1 / (sVar bin widths)
+
       # OPTION 1: Adjust final prob. by bw.j TO OBTAIN density (likelihood) at a point (bin) f(sa|sw) = P(sA=sa|sW=sw):
       cumprodAeqa <- super$predictAeqa(newdata = newdata) * self$bin_weights
       # OPTION 2: Integrate the difference of sA value and its left most bin cutoff: x - b_{j-1} and pass it
