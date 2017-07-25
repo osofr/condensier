@@ -71,11 +71,16 @@ logisfitR6 <- R6Class("logisfitR6",
            Y_vals <- datsum_obj$getY
            has_failed <- FALSE
 
+           if (gvars$verbose) print(paste('0 = ', sum(Y_vals==0), ' 1 =',  sum(Y_vals==1)))
+
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
+             if (gvars$verbose) print(paste("Data is empty! Returning NA estimator"))
+
              m.fit <- rep.int(NA_real_, ncol(X_mat))
              has_failed <- TRUE
            } else {
+
             m.fit <- try(m.fit <- fn(X_mat, Y_vals, ...), silent = TRUE)
 
             # If an algorithm fails, we fall back to the fallback function (which is generally the glm function.
@@ -142,7 +147,7 @@ logisfitR6 <- R6Class("logisfitR6",
 
         default_predict = function(X_mat, m.fit) {
           eta <- X_mat[,!is.na(m.fit$coef), drop = FALSE] %*% m.fit$coef[!is.na(m.fit$coef)]
-          result = tryCatch({
+          result <- tryCatch({
             match.fun(FUN = m.fit$linkfun)(eta)
           }, error = function(e) {
             # If for some reason we are not able to call the fast function, fall back to the slow function
@@ -153,6 +158,15 @@ logisfitR6 <- R6Class("logisfitR6",
               stop(e)
             }
           })
+
+          if(gvars$verbose && any(is.na(result))) {
+            print('We found NA values in predictions using these values:')
+            print(X_mat)
+            print('These were the results:')
+            print(result)
+          }
+          result
+
           return(result)
         },
 
@@ -189,11 +203,11 @@ glmR6 <- R6Class("glmR6",
   private =
     list(
         do.fit = function(X_mat, Y_vals) {
-          ctrl <- glm.control(trace = FALSE)
           # ctrl <- glm.control(trace = FALSE, maxit = 1000)
           # SuppressGivenWarnings({
           #   return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
           # }, GetWarningsToSuppress())
+          ctrl <- glm.control(trace = FALSE)
           suppressWarnings({
             return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl)$coef)
           })
