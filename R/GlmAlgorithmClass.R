@@ -57,10 +57,12 @@ logisfitR6 <- R6Class("logisfitR6",
             # Alternative, set to default replacement val: pAout <- rep.int(gvars$misXreplace, newdatsum_obj$n)
             pAout <- rep.int(gvars$misval, datsum_obj$n)
             if (sum(datsum_obj$subset_idx > 0)) {
-              result <- ifelse(m.fit$has_failed,
-                               private$default_predict(X_mat, m.fit),
-                               private$do.predict(X_mat, m.fit))
-              pAout[datsum_obj$subset_idx] <- result
+              # Be very careful using an ifelse statement here. See https://github.com/osofr/condensier/issues/1
+              if (m.fit$has_failed) {
+                pAout[datsum_obj$subset_idx] <- private$default_predict(X_mat, m.fit)
+              } else {
+                pAout[datsum_obj$subset_idx] <- private$do.predict(X_mat, m.fit)
+              }
             }
             return(pAout)
          },
