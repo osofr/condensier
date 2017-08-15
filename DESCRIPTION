@@ -49,5 +49,4 @@ Collate:
     'SummaryModelContinClasss.R'
     'dhist.r'
     'fit.R'
-    'sl3Class.R'
     'zzz.R'

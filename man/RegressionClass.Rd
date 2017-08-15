@@ -94,6 +94,6 @@ This R6 class defines fields and methods that controls all the parameters for no
   \item{\code{get.reg}}{...}
 }
 }
-
 \keyword{R6}
 \keyword{class}
+

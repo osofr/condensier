@@ -66,3 +66,4 @@ preds <- predict_probability(dens_fit, newdata)
 ## Wrapper function to sample the values from the conditional density fit:
 sampledY <- sample_value(dens_fit, newdata)
 }
+
