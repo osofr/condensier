@@ -4,7 +4,7 @@ condensier
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/condensier)](http://cran.r-project.org/package=condensier)
 [![](http://cranlogs.r-pkg.org/badges/condensier)](http://cran.rstudio.com/web/packages/condensier/index.html)
 [![Travis-CI Build Status](https://travis-ci.org/osofr/condensier.svg?branch=master)](https://travis-ci.org/osofr/condensier)
-[![Coverage Status](https://coveralls.io/repos/osofr/condensier/badge.png?branch=master&service=github)](https://coveralls.io/r/osofr/condensier?branch=master)
+[![Coverage Status](https://img.shields.io/codecov/c/github/osofr/condensier/master.svg)](https://codecov.io/github/osofr/condensier?branch=master)
 
 ### Installation
 
