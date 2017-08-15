@@ -48,6 +48,6 @@ This R6 class can request, store and manage the design matrix Xmat, as well as t
   \item{\code{wipe.alldat}}{...}
 }
 }
+
 \keyword{R6}
 \keyword{class}
-

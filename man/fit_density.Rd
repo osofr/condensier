@@ -4,8 +4,9 @@
 \alias{fit_density}
 \title{Fit (multivariate) conditional density}
 \usage{
-fit_density(X, Y, input_data, nbins = getopt("nbins"),
-  bin_estimator = getopt("bin_estimator"),
+fit_density(X, Y, input_data, bin.method = c("equal.mass", "equal.len",
+  "dhist"), nbins = NA_integer_, maxncats = 20, poolContinVar = FALSE,
+  maxNperBin = 1000, parfit = FALSE, bin_estimator = speedglmR6$new(),
   verbose = getOption("condensier.verbose"))
 }
 \arguments{

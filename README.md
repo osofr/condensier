@@ -6,9 +6,6 @@ condensier
 [![Travis-CI Build Status](https://travis-ci.org/osofr/condensier.svg?branch=master)](https://travis-ci.org/osofr/condensier)
 [![Coverage Status](https://img.shields.io/codecov/c/github/osofr/condensier/master.svg)](https://codecov.io/github/osofr/condensier?branch=master)
 
-<!-- [![Coverage Status](https://coveralls.io/repos/github/osofr/condensier/badge.svg?branch=master)](https://coveralls.io/github/osofr/condensier?branch=master)
- -->
- 
 ### Installation
 
 To install the development version of `condensier` (requires the `devtools` package):
