@@ -5,8 +5,32 @@
 #' @param X A vector containing the names of predictor variables to use for modeling.
 #' @param Y A character string name of the column that represent the response variable(s) in the model.
 #' @param input_data Input dataset, can be a \code{data.frame} or a \code{data.table}.
-#' @param nbins ...
-#' @param bin_estimator ....
+#' @param bin_estimator The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
+#'  another default option is \code{\link{glmR6}}.
+#' @param bin.method The method for choosing bins when discretizing and fitting the conditional continuous summary
+#'  exposure variable \code{sA}. The default method is \code{"equal.len"}, which partitions the range of \code{sA}
+#'  into equal length \code{nbins} intervals. Method \code{"equal.mass"} results in a data-adaptive selection of the bins
+#'  based on equal mass (equal number of observations), i.e., each bin is defined so that it contains an approximately
+#'  the same number of observations across all bins. The maximum number of observations in each bin is controlled
+#'  by parameter \code{maxNperBin}. Method \code{"dhist"} uses a mix of the above two approaches,
+#'  see Denby and Mallows "Variations on the Histogram" (2009) for more detail.
+#' @param parfit Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
+#'  \code{foreach} and \code{dopar} to perform
+#'  parallel logistic regression fits and predictions for discretized continuous outcomes. This functionality
+#'  requires registering a parallel backend prior to running \code{condensier} function, e.g.,
+#'  using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer
+#'  \code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".
+#' @param nbins Set the default number of bins when discretizing a continous outcome variable under setting
+#'  \code{bin.method = "equal.len"}.
+#'  If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
+#'  \code{nobs}/\code{maxNperBin}, where \code{nobs} is the total number of observations in the input data.
+#' @param maxncats Max number of unique levels for cat outcome.
+#' If the outcome has more levels it is automatically considered continuous.
+#' @param poolContinVar Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
+#' When fitting a model for binirized continuous outcome, set to \code{TRUE}
+#' for pooling bin indicators across several bins into one outcome regression?
+#' @param maxNperBin Max number of observations per 1 bin for a continuous outcome (applies directly when
+#'  \code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
 #'
@@ -136,7 +160,8 @@
 #'  (2009)). This interval definition method is selected by passing an argument \code{bin.method="dhist"} to
 #'  \code{tmlenet_options()}  prior to calling \code{tmlenet()}.
 #'
-#' @return An R6 object containing the model fit(s).
+#' @return An R6 object of class \code{SummariesModel} containing the conditional density fit(s).
+#' @example tests/examples/1_condensier_example.R
 #' @export
 fit_density <- function(
                       X,
@@ -147,11 +172,39 @@ fit_density <- function(
                       verbose = getOption("condensier.verbose")
                       ) {
 
-  # gvars$verbose <- verbose
+  ## Perform additional injection if bin_estimator is a learner from sl3 package.
+  ## Specifically, wrap sl3 'Lrnr_base' object into another sl3 wrapper class that
+  ## provides the communication link between two packages.
+  if (inherits(bin_estimator,"Lrnr_base")) {
+    bin_estimator <- sl3_wrapper_logisfitR6$new(sl3_lrnr = bin_estimator)
+  }
+
+  curr.gvars <- gvars$verbose
+  gvars$verbose <- verbose
+
+  bin.method <- bin.method[1L]
+  if (bin.method %in% "equal.len") {
+  } else if (bin.method %in% "equal.mass") {
+  } else if (bin.method %in% "dhist") {
+  } else { stop("bin.method argument must be either 'equal.len', 'equal.mass' or 'dhist'") }
+
+  nbins <- nbins[1L]
+
+  # opts <- list(
+  #   bin_estimator = bin_estimator,
+  #   bin.method = bin.method,
+  #   parfit = parfit,
+  #   nbins = nbins,
+  #   maxncats = maxncats,
+  #   poolContinVar = poolContinVar,
+  #   maxNperBin = maxNperBin
+  # )
+  # gvars$opts <- opts
+
   if (!is.data.table(input_data)) data.table::setDT(input_data)
 
   ## import the input data into internal storage class
-  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X)
+  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X, maxncats = maxncats)
 
   # Find the class of the provided variable
   outcome.class <- data_store_obj$type.sVar[Y]
@@ -163,7 +216,12 @@ fit_density <- function(
                                   nbins = nbins,
                                   outvar.class = outcome.class,
                                   outvar = Y,
-                                  predvars = X)
+                                  predvars = X,
+                                  parfit = parfit,
+                                  bin_bymass = bin.method%in%"equal.mass",
+                                  bin_bydhist = bin.method%in%"dhist",
+                                  max_nperbin = maxNperBin,
+                                  pool_cont = poolContinVar)
                                   # subset = subset_vars)
 
   # Create the conditional density, based on the regression just specified and fit it
@@ -177,7 +235,14 @@ fit_density <- function(
 }
 
 ## ---------------------------------------------------------------------------------------
-#' Predict probability (likelihood) for existing fit, given new data
+#' Predict probability (likelihood) for cond. density fit for new data
+#'
+#' @param model_fit An R6 object of class \code{SummariesModel} returned by \code{\link{fit_density}}.
+#' @param newdata A \code{data.table} or \code{data.frame} containing new predictors and IMPORTANTLY the outcomes.
+#' @return A numeric vector containing the likelihood predictions for new observation.
+#' When \code{bin.method = "equal.mass"} the output is a named vector, with the names corresponding to the
+#' specific bin percentile of each individual outcome.
+#' @example tests/examples/1_condensier_example.R
 #' @export
 predict_probability <- function(model_fit, newdata) {
   assert_that(is(model_fit, "SummariesModel"))
@@ -190,7 +255,12 @@ predict_probability <- function(model_fit, newdata) {
 }
 
 ## ---------------------------------------------------------------------------------------
-#' Sample values from existing conditional density fit, given new data
+#' Sample values from the existing conditional density fit for given new data
+#'
+#' @param model_fit An R6 object of class \code{SummariesModel} returned by \code{\link{fit_density}}.
+#' @param newdata A \code{data.table} or \code{data.frame} containing new predictors / covariates, the outcomes are not needed and wont be used.
+#' @return A numeric vector containing the sampled predictions for new observation.
+#' @example tests/examples/1_condensier_example.R
 #' @export
 sample_value <- function(model_fit, newdata) {
   assert_that(is(model_fit, "SummariesModel"))

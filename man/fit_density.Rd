@@ -15,15 +15,44 @@ fit_density(X, Y, input_data, nbins = getopt("nbins"),
 
 \item{input_data}{Input dataset, can be a \code{data.frame} or a \code{data.table}.}
 
-\item{nbins}{...}
+\item{bin.method}{The method for choosing bins when discretizing and fitting the conditional continuous summary
+exposure variable \code{sA}. The default method is \code{"equal.len"}, which partitions the range of \code{sA}
+into equal length \code{nbins} intervals. Method \code{"equal.mass"} results in a data-adaptive selection of the bins
+based on equal mass (equal number of observations), i.e., each bin is defined so that it contains an approximately
+the same number of observations across all bins. The maximum number of observations in each bin is controlled
+by parameter \code{maxNperBin}. Method \code{"dhist"} uses a mix of the above two approaches,
+see Denby and Mallows "Variations on the Histogram" (2009) for more detail.}
 
-\item{bin_estimator}{....}
+\item{nbins}{Set the default number of bins when discretizing a continous outcome variable under setting
+\code{bin.method = "equal.len"}.
+If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
+\code{nobs}/\code{maxNperBin}, where \code{nobs} is the total number of observations in the input data.}
+
+\item{maxncats}{Max number of unique levels for cat outcome.
+If the outcome has more levels it is automatically considered continuous.}
+
+\item{poolContinVar}{Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
+When fitting a model for binirized continuous outcome, set to \code{TRUE}
+for pooling bin indicators across several bins into one outcome regression?}
+
+\item{maxNperBin}{Max number of observations per 1 bin for a continuous outcome (applies directly when
+\code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).}
+
+\item{parfit}{Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
+\code{foreach} and \code{dopar} to perform
+parallel logistic regression fits and predictions for discretized continuous outcomes. This functionality
+requires registering a parallel backend prior to running \code{condensier} function, e.g.,
+using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer
+\code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".}
+
+\item{bin_estimator}{The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
+another default option is \code{\link{glmR6}}.}
 
 \item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
 Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
 }
 \value{
-An R6 object containing the model fit(s).
+An R6 object of class \code{SummariesModel} containing the conditional density fit(s).
 }
 \description{
 Fit (multivariate) conditional density
@@ -160,3 +189,50 @@ The data-adaptive approach dhist is a mix of Approaches 1 & 2. See Denby and Mal
  \code{tmlenet_options()}  prior to calling \code{tmlenet()}.
 }
 
+\examples{
+library("simcausal")
+D <- DAG.empty()
+D <-
+D + node("W1", distr = "rbern", prob = 0.5) +
+  node("W2", distr = "rbern", prob = 0.3) +
+  node("W3", distr = "rbern", prob = 0.3) +
+  node("sA.mu", distr = "rconst", const = (0.98 * W1 + 0.58 * W2 + 0.33 * W3)) +
+  node("sA", distr = "rnorm", mean = sA.mu, sd = 1)
+D <- set.DAG(D, n.test = 10)
+datO <- sim(D, n = 10000, rndseed = 12345)
+
+## Fit conditional density using equal mass bins (same number of obs per bin):
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    nbins = 20,
+    bin.method = "equal.mass",
+    bin_estimator = speedglmR6$new())
+
+## Wrapper function to predict the conditional probability (likelihood)
+## for new observations:
+newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
+preds <- predict_probability(dens_fit, newdata)
+
+## Wrapper function to sample the values from the conditional density fit:
+sampledY <- sample_value(dens_fit, newdata)
+
+## Fit conditional density using equal length bins
+## (divides the range of support of the outcome to define each bin):
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    nbins = 20,
+    bin.method = "equal.len",
+    bin_estimator = speedglmR6$new())
+
+## Wrapper function to predict the conditional probability (likelihood)
+## for new observations:
+newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
+preds <- predict_probability(dens_fit, newdata)
+
+## Wrapper function to sample the values from the conditional density fit:
+sampledY <- sample_value(dens_fit, newdata)
+}

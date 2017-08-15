@@ -119,17 +119,18 @@ RegressionClass <- R6Class("RegressionClass",
     levels = NULL,
     # family = NULL,               # (NOT IMPLEMENTED) to run w/ other than "binomial" family
     # form = NULL,                 # (NOT IMPLEMENTED) reg formula, if provided run using the usual glm / speedglm functions
+    # Adding ReplMisVal0 = TRUE below for case sA = (netA, sA[j]) with sA[j] continuous, was causing an error otherwise
     initialize = function(sep_predvars_sets = FALSE,
                           outvar.class = gvars$sVartypes$bin,
                           outvar, predvars, subset, intrvls,
-                          ReplMisVal0 = TRUE, # Needed to add ReplMisVal0 = TRUE for case sA = (netA, sA[j]) with sA[j] continuous, was causing an error otherwise:
-                          bin_estimator = getopt("bin_estimator"),
-                          parfit = getopt("parfit"),
-                          nbins = getopt("nbins"),
-                          bin_bymass = getopt("bin.method")%in%"equal.mass",
-                          bin_bydhist = getopt("bin.method")%in%"dhist",
-                          max_nperbin = getopt("maxNperBin"),
-                          pool_cont = getopt("poolContinVar")
+                          ReplMisVal0 = TRUE,
+                          bin_estimator = speedglmR6$new(),
+                          parfit = FALSE,
+                          nbins = NA_integer_,
+                          bin_bymass = TRUE,
+                          bin_bydhist = FALSE,
+                          max_nperbin = 1000,
+                          pool_cont = FALSE
                           ) {
 
       assert_that(length(outvar.class) == length(outvar))

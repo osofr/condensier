@@ -4,8 +4,11 @@ condensier
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/condensier)](http://cran.r-project.org/package=condensier)
 [![](http://cranlogs.r-pkg.org/badges/condensier)](http://cran.rstudio.com/web/packages/condensier/index.html)
 [![Travis-CI Build Status](https://travis-ci.org/osofr/condensier.svg?branch=master)](https://travis-ci.org/osofr/condensier)
-[![Coverage Status](https://coveralls.io/repos/osofr/condensier/badge.png?branch=master&service=github)](https://coveralls.io/r/osofr/condensier?branch=master)
+[![Coverage Status](https://img.shields.io/codecov/c/github/osofr/condensier/master.svg)](https://codecov.io/github/osofr/condensier?branch=master)
 
+<!-- [![Coverage Status](https://coveralls.io/repos/github/osofr/condensier/badge.svg?branch=master)](https://coveralls.io/github/osofr/condensier?branch=master)
+ -->
+ 
 ### Installation
 
 To install the development version of `condensier` (requires the `devtools` package):
@@ -32,7 +35,7 @@ D <- set.DAG(D, n.test = 10)
 datO <- sim(D, n = 10000, rndseed = 12345)
 ```
 
-Fit conditional density:
+Fit conditional density using equal mass bins (same number of obs per bin):
 
 ```R
 library("condensier")
@@ -41,6 +44,7 @@ dens_fit <- fit_density(
     Y = "sA", 
     input_data = datO, 
     nbins = 20, 
+    bin.method = "equal.mass",
     bin_estimator = speedglmR6$new())
 ```
 

@@ -35,7 +35,13 @@ test_that("different binning methods should give the right mean predicted probab
   regclass <- RegressionClass$new(outvar.class = sA_class,
                                   outvar = reg.sVars$outvars,
                                   predvars = reg.sVars$predvars,
-                                  subset = subset_vars)
+                                  subset = subset_vars,
+                                  bin_bymass = FALSE,
+                                  bin_bydhist = FALSE,
+                                  max_nperbin = 1000
+                                  # nbins = 10
+                                  )
+
   summeas.g0 <- SummariesModel$new(reg = regclass, data_object = data_store_obj)
   summeas.g0$fit(data = data_store_obj)
 
@@ -87,16 +93,16 @@ test_that("different binning methods should give the right mean predicted probab
 
   suppressWarnings( setWdat_res <- get.setW.sAdat(setWvals, nsamp) )
 
-  # plot densitity first:
+  ##plot densitity first:
   plot(density(setWdat_res$setWsA))
   lines(datO[subs,][["sA"]], h_gN[subs], type = "p", cex = .3, col = "red")
 
-  # plot predicted vals first:
-  # plot(datO[subs][["sA"]], h_gN[subs], type = "p", cex = .3, col = "red")
-  # lines(density(setWdat_res$setWsA))
+  ##plot predicted vals first:
+  plot(datO[subs][["sA"]], h_gN[subs], type = "p", cex = .3, col = "red")
+  lines(density(setWdat_res$setWsA))
 
   resampA <- summeas.g0$sampleA(newdata = data_store_obj)
-  lines(density(resampA[subs]), col = "blue")
+  # lines(density(resampA[subs]), col = "blue")
 
   # ---------------------------------------------------------------------------------------------------------
   # Plot all predicted discretized probs together (without conditioning on particular subset of W's)
@@ -111,7 +117,10 @@ test_that("different binning methods should give the right mean predicted probab
   regclass.gml <- RegressionClass$new(bin_estimator = glmR6$new(), outvar.class = sA_class,
                                       outvar = reg.sVars$outvars,
                                       predvars = reg.sVars$predvars,
-                                      subset = subset_vars)
+                                      subset = subset_vars,
+                                      bin_bymass = FALSE,
+                                      bin_bydhist = FALSE,
+                                      max_nperbin = 1000)
   summeas.g0.glm <- SummariesModel$new(reg = regclass.gml, data_object = data_store_obj)
   summeas.g0.glm$fit(data = data_store_obj)
 

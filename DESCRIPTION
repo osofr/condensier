@@ -1,12 +1,12 @@
 Package: condensier
 Title: Non-Parametric Conditional Density Estimation
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
     person("Oleg", "Sofrygin", role=c("aut", "cre"), email="oleg.sofrygin@gmail.com"),
     person("Frank", "Blaauw", role="aut", email="f.j.blaauw@rug.nl"),
     person("Antoine", "Chambaz", role="aut", email="achambaz@u-paris10.fr"),
     person(c("Mark", "J."), "van der Laan", role="aut", email="laan@berkeley.edu"))
-Description: TBD
+Description: Semi-parametric conditional density estimation with histograms.
 URL: https://github.com/osofr/condensier
 BugReports: https://github.com/osofr/condensier/issues
 Depends:
@@ -27,7 +27,6 @@ Suggests:
     doParallel,
     foreach,
     knitr,
-    locfit,
     matrixStats,
     roxygen2,
     testthat,
@@ -35,7 +34,7 @@ Suggests:
 VignetteBuilder: knitr
 License: GPL-2
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Collate:
     'GlmAlgorithmClass.R'
     'BinOutModelClass.R'
