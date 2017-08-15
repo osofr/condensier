@@ -23,10 +23,9 @@ test_that("automatic outcome type recognition", {
                         b = condensier:::gvars$sVartypes$bin,
                         c = condensier:::gvars$sVartypes$cat,
                         d = condensier:::gvars$sVartypes$cont)
-  out.types <- condensier:::detect.col.types(test_mat)
+  out.types <- condensier:::detect.col.types(test_mat, maxncats = 10)
   expect_true(all.equal(correct.types, out.types))
 })
-
 
 test_that("binary outcome (treated as continuous), binning results in same outcome as original binary.", {
   nbins <- 10L
@@ -70,7 +69,7 @@ test_that("bin indicator matrix for ordinal variable that's not in standard rang
 test_that("continuous and categorical interval cuttofs are created as expected", {
   nsamp <- 1000
   nbins <- 10
-  oldopts <- condensier_options(maxncats = 5, nbins = nbins)
+  # oldopts <- condensier_options(maxncats = 5, nbins = nbins)
   # ----------------------------------------------------------------------------------------
   # Continuous
   # ----------------------------------------------------------------------------------------
@@ -78,7 +77,7 @@ test_that("continuous and categorical interval cuttofs are created as expected",
   data.table::setDT(datO)
   Kmax <- 3L
   datO[, "nF" := sample(1L:Kmax, nrow(datO), replace = TRUE)]
-  datNetObs <- DataStore$new(input_data = datO, Y = "sA", X = c("W1", "W2", "W3", "nF"))
+  datNetObs <- DataStore$new(input_data = datO, Y = "sA", X = c("W1", "W2", "W3", "nF"), maxncats = 5)
 
   # datNetObs <- makedat(nsamp=nsamp, Kmax=3)
   obsdat.sW <- datNetObs$dat.sVar

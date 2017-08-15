@@ -2,15 +2,15 @@
 % Please edit documentation in R/zzz.R
 \name{condensier_options}
 \alias{condensier_options}
-\title{Setting Options for \code{condensier}}
+\title{(RETIRED) Setting Options for \code{condensier}}
 \usage{
 condensier_options(bin_estimator = speedglmR6$new(), parfit = FALSE,
   bin.method = c("equal.len", "equal.mass", "dhist"), nbins = NA,
   maxncats = 20, poolContinVar = FALSE, maxNperBin = 1000)
 }
 \arguments{
-\item{bin_estimator}{The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link[speedglm]{speedglmR6}})
-another default option is \code{\link[stats]{glmR6}}.}
+\item{bin_estimator}{The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
+another default option is \code{\link{glmR6}}.}
 
 \item{parfit}{Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
 \code{foreach} and \code{dopar} to perform
@@ -46,7 +46,8 @@ for pooling bin indicators across several bins into one outcome regression?}
 Invisibly returns a list with old option settings.
 }
 \description{
-Additional options that control the estimation algorithm in \code{condensier} package
+This function is now retired. Please use \code{\link{fit_density}} directly for tuning parameter set-up.
+Calling this function now will have no effect. Previously provided additional options that control the estimation algorithm in \code{condensier} package.
 }
 \seealso{
 \code{\link{print_condensier_opts}}

@@ -32,7 +32,7 @@ D <- set.DAG(D, n.test = 10)
 datO <- sim(D, n = 10000, rndseed = 12345)
 ```
 
-Fit conditional density:
+Fit conditional density using equal mass bins (same number of obs per bin):
 
 ```R
 library("condensier")
@@ -41,6 +41,7 @@ dens_fit <- fit_density(
     Y = "sA", 
     input_data = datO, 
     nbins = 20, 
+    bin.method = "equal.mass",
     bin_estimator = speedglmR6$new())
 ```
 

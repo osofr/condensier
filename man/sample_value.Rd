@@ -2,10 +2,65 @@
 % Please edit documentation in R/fit.R
 \name{sample_value}
 \alias{sample_value}
-\title{Sample values from existing conditional density fit, given new data}
+\title{Sample values from the existing conditional density fit for given new data}
 \usage{
 sample_value(model_fit, newdata)
 }
+\arguments{
+\item{model_fit}{An R6 object of class \code{SummariesModel} returned by \code{\link{fit_density}}.}
+
+\item{newdata}{A \code{data.table} or \code{data.frame} containing new predictors / covariates, the outcomes are not needed and wont be used.}
+}
+\value{
+A numeric vector containing the sampled predictions for new observation.
+}
 \description{
-Sample values from existing conditional density fit, given new data
+Sample values from the existing conditional density fit for given new data
+}
+\examples{
+library("simcausal")
+D <- DAG.empty()
+D <-
+D + node("W1", distr = "rbern", prob = 0.5) +
+  node("W2", distr = "rbern", prob = 0.3) +
+  node("W3", distr = "rbern", prob = 0.3) +
+  node("sA.mu", distr = "rconst", const = (0.98 * W1 + 0.58 * W2 + 0.33 * W3)) +
+  node("sA", distr = "rnorm", mean = sA.mu, sd = 1)
+D <- set.DAG(D, n.test = 10)
+datO <- sim(D, n = 10000, rndseed = 12345)
+
+## Fit conditional density using equal mass bins (same number of obs per bin):
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    nbins = 20,
+    bin.method = "equal.mass",
+    bin_estimator = speedglmR6$new())
+
+## Wrapper function to predict the conditional probability (likelihood)
+## for new observations:
+newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
+preds <- predict_probability(dens_fit, newdata)
+
+## Wrapper function to sample the values from the conditional density fit:
+sampledY <- sample_value(dens_fit, newdata)
+
+## Fit conditional density using equal length bins
+## (divides the range of support of the outcome to define each bin):
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    nbins = 20,
+    bin.method = "equal.len",
+    bin_estimator = speedglmR6$new())
+
+## Wrapper function to predict the conditional probability (likelihood)
+## for new observations:
+newdata <- datO[1:5, c("W1", "W2", "W3", "sA"), with = FALSE]
+preds <- predict_probability(dens_fit, newdata)
+
+## Wrapper function to sample the values from the conditional density fit:
+sampledY <- sample_value(dens_fit, newdata)
 }

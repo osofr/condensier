@@ -10,14 +10,6 @@ gvars$misXreplace <- 0L     # the default replacement value for misval that appe
 gvars$tolerr <- 10^-12      # tolerance error: assume for abs(a-b) < gvars$tolerr => a = b
 gvars$sVartypes <- list(bin = "binary", cat = "categor", cont = "contin")
 
-# setopt <- function(optname, val) {
-#   opt <- gvars$opts
-#   if (!(optname %in% (names(opt)))) stop(optname %+% ": this options does not exist")
-#   old.optval <- opt[[optname]]
-#   opt[[optname]] <- val
-#   invisible(old.optval)
-# }
-
 #' Get Option Value for \code{condensier}
 #'
 #' @param optname The name of the consdensier option.
@@ -39,11 +31,12 @@ print_condensier_opts <- function() {
   invisible(gvars$opts)
 }
 
-#' Setting Options for \code{condensier}
+#' (RETIRED) Setting Options for \code{condensier}
 #'
-#' Additional options that control the estimation algorithm in \code{condensier} package
-#' @param bin_estimator The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link[speedglm]{speedglmR6}})
-#'  another default option is \code{\link[stats]{glmR6}}.
+#' This function is now retired. Please use \code{\link{fit_density}} directly for tuning parameter set-up.
+#' Calling this function now will have no effect. Previously provided additional options that control the estimation algorithm in \code{condensier} package.
+#' @param bin_estimator The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
+#'  another default option is \code{\link{glmR6}}.
 #' @param bin.method The method for choosing bins when discretizing and fitting the conditional continuous summary
 #'  exposure variable \code{sA}. The default method is \code{"equal.len"}, which partitions the range of \code{sA}
 #'  into equal length \code{nbins} intervals. Method \code{"equal.mass"} results in a data-adaptive selection of the bins
@@ -79,7 +72,7 @@ condensier_options <- function(bin_estimator = speedglmR6$new(),
                             poolContinVar = FALSE,
                             maxNperBin = 1000
                             ) {
-
+  warning("condensier_options() is now retired. Please use fit_density directly for tuning parameter set-up. Calling this function has no effect.")
   old.opts <- gvars$opts
   bin.method <- bin.method[1L]
 
@@ -99,7 +92,7 @@ condensier_options <- function(bin_estimator = speedglmR6$new(),
     poolContinVar = poolContinVar,
     maxNperBin = maxNperBin
   )
-  gvars$opts <- opts
+  # gvars$opts <- opts
   invisible(old.opts)
 }
 
@@ -136,7 +129,7 @@ gvars$misfun <- testmisfun()
     condensier.verbose = gvars$verbose
   )
   # reset all options to their defaults on load:
-  condensier_options()
+  # condensier_options()
 
   toset <- !(names(op.condensier) %in% names(op))
   if(any(toset)) options(op.condensier[toset])

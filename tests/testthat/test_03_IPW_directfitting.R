@@ -38,7 +38,9 @@ test_that("direct RegressionClass method should still work, means of the resampl
                                   outvar = reg.sVars$outvars,
                                   predvars = reg.sVars$predvars,
                                   subset = subset_vars,
-                                  nbins=50)
+                                  nbins=50,
+                                  bin_bymass = FALSE,
+                                  bin_bydhist = FALSE)
   summeas.g0 <- SummariesModel$new(reg = regclass, data_object = data_store_obj)
   summeas.g0$fit(data = data_store_obj)
   summeas.g0$predict(newdata = data_store_obj)  # summeas.g0$sA_nms

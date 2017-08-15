@@ -21,7 +21,7 @@ test_that("categorical variable can be binned in various ways, including it bein
 # test.detect.int.sA <- function() {
   nsamp <- 1000
   nbins <- 10
-  oldopts <- condensier_options(maxncats = 5, nbins = nbins)
+  # oldopts <- condensier_options(maxncats = 5, nbins = nbins)
   # ----------------------------------------------------------------------------------------
   # Continuous
   # ----------------------------------------------------------------------------------------
@@ -29,19 +29,19 @@ test_that("categorical variable can be binned in various ways, including it bein
   data.table::setDT(datO)
   Kmax <- 10L
   datO[, "nF" := sample(1L:Kmax, nrow(datO), replace = TRUE)]
-  datNetObs <- DataStore$new(input_data = datO, Y = "nF", X = c("W1", "W2", "W3", "nF"))
+  datNetObs <- DataStore$new(input_data = datO, Y = "nF", X = c("W1", "W2", "W3", "nF"), maxncats = 5)
 
   # ----------------------------------------------------------------------------------------
   # ******** THIS IS PRETTY BAD. THE RESULT COLLAPSES nF TO 3/4 categories only ***********
   # Categorical w maxncats < ncats, so gets detected as contin and categories get collapsed
   # ----------------------------------------------------------------------------------------
   # datNetObs <- makedat(nsamp=nsamp, Kmax=10)
-  condensier_options(maxncats = 5, nbins = 10)
+  # condensier_options(maxncats = 5, nbins = 10)
   obsdat.sW <- datNetObs$dat.sVar
   head(obsdat.sW,10)
   table(obsdat.sW[["nF"]])
-  # 0   6   7   8   9  10
-  # 1   1   1   2   3 992
+  #   1   2   3   4   5   6   7   8   9  10
+  # 108 101  94 104  90 101 105  98  97 102
   str(datNetObs$type.sVar)
   # $ nF: chr "contin"
 
@@ -80,7 +80,7 @@ test_that("categorical variable can be binned in various ways, including it bein
                                             max_nperbin = 100)
   defints3e
 
- do.call(condensier_options, oldopts)
+ # do.call(condensier_options, oldopts)
 })
 
 
