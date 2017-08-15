@@ -52,4 +52,3 @@ Calling this function now will have no effect. Previously provided additional op
 \seealso{
 \code{\link{print_condensier_opts}}
 }
-

@@ -12,4 +12,3 @@ speedglmR6
 speedglmR6
 }
 \keyword{datasets}
-

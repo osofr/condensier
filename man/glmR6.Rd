@@ -12,4 +12,3 @@ glmR6
 glmR6
 }
 \keyword{datasets}
-

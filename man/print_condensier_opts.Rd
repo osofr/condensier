@@ -15,4 +15,3 @@ Print Current Option Settings for \code{condensier}
 \seealso{
 \code{\link{condensier_options}}
 }
-
