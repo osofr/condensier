@@ -51,4 +51,3 @@ Additional options that control the estimation algorithm in \code{condensier} pa
 \seealso{
 \code{\link{print_condensier_opts}}
 }
-

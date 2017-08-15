@@ -142,12 +142,44 @@ fit_density <- function(
                       X,
                       Y,
                       input_data,
-                      nbins = getopt("nbins"),
-                      bin_estimator = getopt("bin_estimator"),
+                      bin.method = c("equal.mass", "equal.len", "dhist"),
+                      nbins = NA_integer_,
+                      maxncats = 20,
+                      poolContinVar = FALSE,
+                      maxNperBin = 1000,
+                      parfit = FALSE,
+                      bin_estimator = speedglmR6$new(),
                       verbose = getOption("condensier.verbose")
                       ) {
 
-  # gvars$verbose <- verbose
+  ## Perform additional injection if bin_estimator is a learner from sl3 package.
+  ## Specifically, wrap sl3 'Lrnr_base' object into another sl3 wrapper class that
+  ## provides the communication link between two packages.
+  if (inherits(bin_estimator,"Lrnr_base")) {
+    bin_estimator <- sl3_wrapper_logisfitR6$new(sl3_lrnr = bin_estimator)
+  }
+
+  curr.gvars <- gvars$verbose
+  gvars$verbose <- verbose
+
+  bin.method <- bin.method[1L]
+  if (bin.method %in% "equal.len") {
+  } else if (bin.method %in% "equal.mass") {
+  } else if (bin.method %in% "dhist") {
+  } else { stop("bin.method argument must be either 'equal.len', 'equal.mass' or 'dhist'") }
+
+  opts <- list(
+    bin_estimator = bin_estimator,
+    bin.method = bin.method,
+    parfit = parfit,
+    nbins = nbins[1L],
+    maxncats = maxncats,
+    poolContinVar = poolContinVar,
+    maxNperBin = maxNperBin
+  )
+
+  gvars$opts <- opts
+
   if (!is.data.table(input_data)) data.table::setDT(input_data)
 
   ## import the input data into internal storage class
@@ -170,9 +202,9 @@ fit_density <- function(
   conditional_density <- SummariesModel$new(reg = regclass, data_object = data_store_obj)
 
   # print("conditional_density$reg$subset"); print(conditional_density$reg$subset)
-
   conditional_density$fit(data = data_store_obj)
 
+  gvars$verbose <- curr.gvars
   return(conditional_density)
 }
 

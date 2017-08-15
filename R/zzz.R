@@ -18,6 +18,12 @@ gvars$sVartypes <- list(bin = "binary", cat = "categor", cont = "contin")
 #   invisible(old.optval)
 # }
 
+#' Get Option Value for \code{condensier}
+#'
+#' @param optname The name of the consdensier option.
+#' @return An option value.
+#' @seealso \code{\link{condensier_options}}
+#' @export
 getopt <- function(optname) {
   opt <- gvars$opts
   if (!(optname %in% (names(opt)))) stop(optname %+% ": this options does not exist")

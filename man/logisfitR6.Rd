@@ -12,4 +12,3 @@ logisfitR6
 logisfitR6
 }
 \keyword{datasets}
-

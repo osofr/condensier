@@ -2,13 +2,13 @@
 if(FALSE) {
   # CHECK AND BUILD PACKAGE:
   # library("condensier")
-  library("roxygen2")
+  # library("roxygen2")
   library("devtools")
-  library("testthat")
-  library("data.table")
+  # library("testthat")
+  # library("data.table")
   setwd(".."); setwd(".."); getwd()
-  document()
-  load_all("./", create = FALSE) # load all R files in /R and datasets in /data. Ignores NAMESPACE:
+  devtools::document()
+  devtools::load_all("./", create = FALSE) # load all R files in /R and datasets in /data. Ignores NAMESPACE:
   # condensier:::debug_set() # SET TO DEBUG MODE
 
   setwd("..");

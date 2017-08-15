@@ -9,4 +9,3 @@ sample_value(model_fit, newdata)
 \description{
 Sample values from existing conditional density fit, given new data
 }
-

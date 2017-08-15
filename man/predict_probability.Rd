@@ -9,4 +9,3 @@ predict_probability(model_fit, newdata)
 \description{
 Predict probability (likelihood) for existing fit, given new data
 }
-
