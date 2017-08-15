@@ -35,8 +35,8 @@ Suggests:
 VignetteBuilder: knitr
 License: GPL-2
 LazyData: true
-RoxygenNote: 6.0.1
-Collate: 
+RoxygenNote: 5.0.1
+Collate:
     'GlmAlgorithmClass.R'
     'BinOutModelClass.R'
     'DataStoreClass.R'
@@ -50,5 +50,4 @@ Collate:
     'SummaryModelContinClasss.R'
     'dhist.r'
     'fit.R'
-    'sl3Class.R'
     'zzz.R'

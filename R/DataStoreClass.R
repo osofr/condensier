@@ -71,7 +71,7 @@ normalize_matsVar <- function(sVar_mat) apply(sVar_mat, 2, normalize_sVar)
 define.intervals <- function(x, nbins, bin_bymass, bin_bydhist, max_nperbin) {
   x <- x[!gvars$misfun(x)]  # remove missing vals
   nvals <- length(unique(x))
-  if (is.na(nbins)) nbins <- max(5L, as.integer(length(x) / max_nperbin))
+  if (is.na(nbins)) nbins <- as.integer(length(x) / max_nperbin)
   # if nbins is too high, for ordinal, set nbins to n unique obs and cancel quantile based interval defns
   if (nvals < nbins) {
     nbins <- nvals

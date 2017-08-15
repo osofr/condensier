@@ -134,8 +134,10 @@ BinDat <- R6Class(classname = "BinDat",
       self$outvars_to_pool <- reg$outvars_to_pool
       self$ReplMisVal0 <- reg$ReplMisVal0
       self$nbins <- reg$nbins
+
       # if (is.null(reg$subset)) {self$subset_expr <- TRUE}
       # if (is.null(reg$subset)) {self$subset_expr <- NULL}
+
       assert_that(is.logical(self$subset_expr) || is.call(self$subset_expr) || is.character(self$subset_expr) || is.null(self$subset_expr))
       invisible(self)
     },
@@ -157,6 +159,7 @@ BinDat <- R6Class(classname = "BinDat",
     },
 
     define.subset_idx = function(data) {
+
       if (is.null(self$subset_expr)) {
         subset_idx <- 1:data$nobs
       } else if (is.logical(self$subset_expr)) {
@@ -193,13 +196,13 @@ BinDat <- R6Class(classname = "BinDat",
       self$subset_idx <- self$define.subset_idx(data)
       if (getoutvar) private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # Always a vector
       if (sum(self$subset_idx) == 0L || length(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
-        # private$X_mat <- data.table::as.data.table(matrix(, nrow = 0L, ncol = (length(self$predvars) + 1)))
-        private$X_mat <- data.table::as.data.table(matrix(, nrow = 0L, ncol = (length(self$predvars))))
-        # colnames(private$X_mat) <- c("Intercept", self$predvars)
-        colnames(private$X_mat) <- c(self$predvars)
+        private$X_mat <- matrix(, nrow = 0L, ncol = (length(self$predvars) + 1))
+        colnames(private$X_mat) <- c("Intercept", self$predvars)
       } else {
         # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DataStore$get.dat.sWsA() IS MADE ***
-        private$X_mat <- data$get.dat.sWsA(self$subset_idx, self$predvars)
+        private$X_mat <- as.matrix(cbind(Intercept = 1, data$get.dat.sWsA(self$subset_idx, self$predvars)))
+        # To find and replace misvals in X_mat:
+        if (self$ReplMisVal0) private$X_mat[gvars$misfun(private$X_mat)] <- gvars$misXreplace
       }
       invisible(self)
     },
@@ -233,13 +236,16 @@ BinDat <- R6Class(classname = "BinDat",
       sVar_melt_DT <- join.Xmat(X_mat = data$get.dat.sWsA(self$subset_idx, self$predvars),
                                 sVar_melt_DT = BinsDat_long, ID = self$ID)
       # prepare design matrix for modeling w/ glm.fit or speedglm.wfit:
-      X_mat <- sVar_melt_DT[,c("bin_ID", self$predvars), with=FALSE] # [, c("Intercept") := 1] # select bin_ID + predictors, add intercept column
-      setcolorder(X_mat, c("bin_ID", self$predvars)) # re-order columns by reference (no copy)
+      X_mat <- sVar_melt_DT[,c("bin_ID", self$predvars), with=FALSE][, c("Intercept") := 1] # select bin_ID + predictors, add intercept column
+      setcolorder(X_mat, c("Intercept", "bin_ID", self$predvars)) # re-order columns by reference (no copy)
       self$ID <- sVar_melt_DT[["ID"]]
-      # private$X_mat <- as.matrix(X_mat)
-      private$X_mat <- X_mat
+      private$X_mat <- as.matrix(X_mat)
       private$Y_vals <- sVar_melt_DT[, self$pooled_bin_name, with = FALSE][[1]] # outcome vector:
 
+      if (gvars$verbose) {
+        print("private$X_mat[1:10,]"); print(private$X_mat[1:10,])
+        print("head(private$Y_vals)"); print(head(private$Y_vals, 100))
+      }
       # **************************************
       # TO FINISH...
       # **************************************
@@ -250,7 +256,7 @@ BinDat <- R6Class(classname = "BinDat",
       #   # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DataStore$get.dat.sWsA() IS MADE ***
       #   private$X_mat <- as.matrix(cbind(Intercept = 1, data$get.dat.sWsA(self$subset_idx, self$predvars)))
         # To find and replace misvals in X_mat:
-        # if (self$ReplMisVal0) private$X_mat[gvars$misfun(private$X_mat)] <- gvars$misXreplace
+        if (self$ReplMisVal0) private$X_mat[gvars$misfun(private$X_mat)] <- gvars$misXreplace
       # }
     }
   ),
@@ -260,14 +266,7 @@ BinDat <- R6Class(classname = "BinDat",
     emptyY = function() { private$Y_vals <- NULL},
     emptySubset_idx = function() { self$subset_idx <- NULL },
     emptyN = function() { self$n <- NA_integer_ },
-    getXmat = function() {
-      X_mat <- private$X_mat
-      X_mat <- cbind(Intercept = rep(1L, nrow(X_mat)), X_mat)
-      X_mat <- as.matrix(X_mat)
-      if (self$ReplMisVal0) X_mat[gvars$misfun(X_mat)] <- gvars$misXreplace
-      return(X_mat)
-    },
-    getXDT = function() { return(private$X_mat) },
+    getXmat = function() {private$X_mat},
     getY = function() {private$Y_vals}
   ),
 
@@ -472,7 +471,7 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
         stop("not implemented")
         # probAeqa <- self$bindat$logispredict.long(m.fit = private$m.fit) # overwrite probA1 with new predictions:
       } else {
-        # get probability P(sA[j]=1|sW=newdata) from newdata, then sample a value from rbinom
+        # get probability P(sA[j]=1|sW=newdata) from newdata, then sample from rbinom
         probA1 <- self$binfitalgorithm$predict(datsum_obj = self$bindat, m.fit = private$m.fit)
         sampleA <- rep.int(0L, n)
         sampleA[self$getsubset] <- rbinom(n = n, size = 1, prob = probA1)
