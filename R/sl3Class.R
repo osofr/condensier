@@ -7,7 +7,6 @@ sl3_wrapper_logisfitR6 <- R6Class("sl3_wrapper_logisfitR6",
   public = list(
     lmclass = NULL,
     fitfunname = NULL,
-    # sl3_lrnr = NULL,
 
     initialize = function(sl3_lrnr) {
       assert_that(is(sl3_lrnr,"Lrnr_base"))
@@ -19,14 +18,27 @@ sl3_wrapper_logisfitR6 <- R6Class("sl3_wrapper_logisfitR6",
     },
 
     fit = function(datsum_obj) {
-      if (gvars$verbose) print(paste("calling glm.generic for", self$fitfunname))
+      if (gvars$verbose) print(paste("calling ", self$fitfunname))
       X_mat <- datsum_obj$getXDT
       Y_vals <- datsum_obj$getY
       dataDT <- cbind(X_mat, Y = Y_vals)
       sl3_lrnr <- private$sl3_lrnr
       if (nrow(dataDT) > 0) {
         task <- sl3::sl3_Task$new(dataDT, covariates=colnames(X_mat), outcome=colnames(dataDT)[ncol(dataDT)])
-        sl3_lrnr <- sl3_lrnr$train(task)
+        # out <- capture.output(
+          sl3_lrnr <- try(suppressWarnings(sl3_lrnr$train(task)))
+        # )
+        if (inherits(sl3_lrnr, "try-error") || inherits(sl3_lrnr$fit_object, "try-error")) { # if failed, use fall back learner
+          if (gvars$verbose) {
+            message(paste0("learner ", self$fitfunname ," failed, falling back on private$fallback_learner; "))
+            if (inherits(sl3_lrnr, "Lrnr_base")) {
+              print(sl3_lrnr$name)
+            } else {
+              print(sl3_lrnr)
+            }
+          }
+          sl3_lrnr <- private$fallback_learner$new(family = "binomial")$train(task)
+        }
       }
       if (gvars$verbose) print(sl3_lrnr)
       return(sl3_lrnr)
@@ -56,6 +68,7 @@ sl3_wrapper_logisfitR6 <- R6Class("sl3_wrapper_logisfitR6",
     }
   ),
 private = list(
+  fallback_learner = sl3::Lrnr_glm_fast,
   sl3_lrnr = NULL
   )
 )

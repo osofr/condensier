@@ -476,7 +476,6 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
         probA1 <- self$binfitalgorithm$predict(datsum_obj = self$bindat, m.fit = private$m.fit)
         sampleA <- rep.int(0L, n)
         sampleA[self$getsubset] <- rbinom(n = n, size = 1, prob = probA1)
-
       #   indA <- newdata$get.outvar(self$getsubset, self$getoutvarnm) # Always a vector of 0/1
       #   assert_that(is.integerish(indA)) # check that obsdat.sA is always a vector of of integers
       #   probAeqa <- rep.int(1L, n) # for missing, the likelihood is always set to P(A = a) = 1.

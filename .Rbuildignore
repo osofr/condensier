@@ -9,6 +9,8 @@
 ^tests/$
 ^tests/RUnit/$
 ^\.travis\.yml$
+^\.travis\.yml$
+^appveyor\.yml$
 ^\.sublime-project$
 ^\.sublime-workspace$
 xterm-256color.ti
