@@ -177,13 +177,6 @@ fit_density <- function(
                       verbose = getOption("condensier.verbose")
                       ) {
 
-  ## Perform additional injection if bin_estimator is a learner from sl3 package.
-  ## Specifically, wrap sl3 'Lrnr_base' object into another sl3 wrapper class that
-  ## provides the communication link between two packages.
-  if (inherits(bin_estimator,"Lrnr_base")) {
-    bin_estimator <- sl3_wrapper_logisfitR6$new(sl3_lrnr = bin_estimator)
-  }
-
   curr.gvars <- gvars$verbose
   gvars$verbose <- verbose
 
