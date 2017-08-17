@@ -42,7 +42,7 @@ dens_fit <- fit_density(
     Y = "sA", 
     input_data = datO, 
     nbins = 20, 
-    bin.method = "equal.mass",
+    bin_method = "equal.mass",
     bin_estimator = speedglmR6$new())
 ```
 

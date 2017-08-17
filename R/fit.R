@@ -7,12 +7,12 @@
 #' @param input_data Input dataset, can be a \code{data.frame} or a \code{data.table}.
 #' @param bin_estimator The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
 #'  another default option is \code{\link{glmR6}}.
-#' @param bin.method The method for choosing bins when discretizing and fitting the conditional continuous summary
+#' @param bin_method The method for choosing bins when discretizing and fitting the conditional continuous summary
 #'  exposure variable \code{sA}. The default method is \code{"equal.len"}, which partitions the range of \code{sA}
 #'  into equal length \code{nbins} intervals. Method \code{"equal.mass"} results in a data-adaptive selection of the bins
 #'  based on equal mass (equal number of observations), i.e., each bin is defined so that it contains an approximately
 #'  the same number of observations across all bins. The maximum number of observations in each bin is controlled
-#'  by parameter \code{maxNperBin}. Method \code{"dhist"} uses a mix of the above two approaches,
+#'  by parameter \code{max_n_bin}. Method \code{"dhist"} uses a mix of the above two approaches,
 #'  see Denby and Mallows "Variations on the Histogram" (2009) for more detail.
 #' @param parfit Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
 #'  \code{foreach} and \code{dopar} to perform
@@ -21,16 +21,16 @@
 #'  using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer
 #'  \code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".
 #' @param nbins Set the default number of bins when discretizing a continous outcome variable under setting
-#'  \code{bin.method = "equal.len"}.
+#'  \code{bin_method = "equal.len"}.
 #'  If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
-#'  \code{nobs}/\code{maxNperBin}, where \code{nobs} is the total number of observations in the input data.
-#' @param maxncats Max number of unique levels for cat outcome.
+#'  \code{nobs}/\code{max_n_bin}, where \code{nobs} is the total number of observations in the input data.
+#' @param max_n_cat Max number of unique levels for cat outcome.
 #' If the outcome has more levels it is automatically considered continuous.
-#' @param poolContinVar Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
+#' @param pool Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
 #' When fitting a model for binirized continuous outcome, set to \code{TRUE}
 #' for pooling bin indicators across several bins into one outcome regression?
-#' @param maxNperBin Max number of observations per 1 bin for a continuous outcome (applies directly when
-#'  \code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).
+#' @param max_n_bin Max number of observations per 1 bin for a continuous outcome (applies directly when
+#'  \code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"}, but \code{nbins = NA}).
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
 #'
@@ -123,7 +123,7 @@
 #'
 #' There are 3 alternative methods to defining the bin cutoffs S=(i_1,...,i_M,i_{M+1}) for a continuous summary measure
 #'  \code{sA}. The choice of which method is used along with other discretization parameters (e.g., total number of
-#'  bins) is controlled via the tmlenet_options() function. See \code{?tmlenet_options} argument \code{bin.method} for
+#'  bins) is controlled via the tmlenet_options() function. See \code{?tmlenet_options} argument \code{bin_method} for
 #'  additional details.
 #'
 #' Approach 1 (\code{equal.len}): equal length, default.
@@ -131,12 +131,12 @@
 #' *********************
 #'
 #' The bins are defined by splitting the range of observed \code{sA} (sa_1,...,sa_n) into equal length intervals.
-#'  This is the dafault discretization method, set by passing an argument \code{bin.method="equal.len"} to
+#'  This is the dafault discretization method, set by passing an argument \code{bin_method="equal.len"} to
 #'  \code{tmlenet_options} function prior to calling \code{tmlenet()}. The intervals will be defined by splitting the
 #'  range of (sa_1,...,sa_N) into \code{nbins} number of equal length intervals, where \code{nbins} is another argument
 #'  of \code{tmlenet_options()} function. When \code{nbins=NA} (the default setting) the actual value of \code{nbins}
-#'  is computed at run time by taking the integer value (floor) of \code{n/maxNperBin},
-#'  for \code{n} - the total observed sample size and \code{maxNperBin=1000} - another argument of
+#'  is computed at run time by taking the integer value (floor) of \code{n/max_n_bin},
+#'  for \code{n} - the total observed sample size and \code{max_n_bin=1000} - another argument of
 #'  \code{tmlenet_options()} with the default value 1,000.
 #'
 #' Approach 2 (\code{equal.mass}): data-adaptive equal mass intervals.
@@ -145,19 +145,19 @@
 #'
 #' The intervals are defined by splitting the range of \code{sA} into non-equal length data-adaptive intervals that
 #'  ensures that each interval contains around
-#'  \code{maxNperBin} observations from (sa_j:j=1,...,N).
-#'  This interval definition approach can be selected by passing an argument \code{bin.method="equal.mass"} to
+#'  \code{max_n_bin} observations from (sa_j:j=1,...,N).
+#'  This interval definition approach can be selected by passing an argument \code{bin_method="equal.mass"} to
 #'  \code{tmlenet_options()} prior to calling \code{tmlenet()}.
 #'  The method ensures that an approximately equal number of observations will belong to each interval, where that number
 #'  of observations for each interval
-#'  is controlled by setting \code{maxNperBin}. The default setting is \code{maxNperBin=1000} observations per interval.
+#'  is controlled by setting \code{max_n_bin}. The default setting is \code{max_n_bin=1000} observations per interval.
 #'
 #' Approach 3 (\code{dhist}): combination of 1 & 2.
 #'
 #' *********************
 #'
 #' The data-adaptive approach dhist is a mix of Approaches 1 & 2. See Denby and Mallows "Variations on the Histogram"
-#'  (2009)). This interval definition method is selected by passing an argument \code{bin.method="dhist"} to
+#'  (2009)). This interval definition method is selected by passing an argument \code{bin_method="dhist"} to
 #'  \code{tmlenet_options()}  prior to calling \code{tmlenet()}.
 #'
 #' @return An R6 object of class \code{SummariesModel} containing the conditional density fit(s).
@@ -167,11 +167,11 @@ fit_density <- function(
                       X,
                       Y,
                       input_data,
-                      bin.method = c("equal.mass", "equal.len", "dhist"),
+                      bin_method = c("equal.mass", "equal.len", "dhist"),
                       nbins = NA_integer_,
-                      maxncats = 20,
-                      poolContinVar = FALSE,
-                      maxNperBin = 1000,
+                      max_n_cat = 20,
+                      pool = FALSE,
+                      max_n_bin = 1000,
                       parfit = FALSE,
                       bin_estimator = speedglmR6$new(),
                       verbose = getOption("condensier.verbose")
@@ -180,29 +180,28 @@ fit_density <- function(
   curr.gvars <- gvars$verbose
   gvars$verbose <- verbose
 
-  bin.method <- bin.method[1L]
-  if (bin.method %in% "equal.len") {
-  } else if (bin.method %in% "equal.mass") {
-  } else if (bin.method %in% "dhist") {
-  } else { stop("bin.method argument must be either 'equal.len', 'equal.mass' or 'dhist'") }
+  bin_method <- bin_method[1L]
+  if (bin_method %in% "equal.len") {
+  } else if (bin_method %in% "equal.mass") {
+  } else if (bin_method %in% "dhist") {
+  } else { stop("bin_method argument must be either 'equal.len', 'equal.mass' or 'dhist'") }
 
   nbins <- nbins[1L]
-
   # opts <- list(
   #   bin_estimator = bin_estimator,
-  #   bin.method = bin.method,
+  #   bin_method = bin_method,
   #   parfit = parfit,
   #   nbins = nbins,
-  #   maxncats = maxncats,
-  #   poolContinVar = poolContinVar,
-  #   maxNperBin = maxNperBin
+  #   max_n_cat = max_n_cat,
+  #   pool = pool,
+  #   max_n_bin = max_n_bin
   # )
   # gvars$opts <- opts
 
   if (!is.data.table(input_data)) data.table::setDT(input_data)
 
   ## import the input data into internal storage class
-  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X, maxncats = maxncats)
+  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X, max_n_cat = max_n_cat)
 
   # Find the class of the provided variable
   outcome.class <- data_store_obj$type.sVar[Y]
@@ -216,10 +215,10 @@ fit_density <- function(
                                   outvar = Y,
                                   predvars = X,
                                   parfit = parfit,
-                                  bin_bymass = bin.method%in%"equal.mass",
-                                  bin_bydhist = bin.method%in%"dhist",
-                                  max_nperbin = maxNperBin,
-                                  pool_cont = poolContinVar)
+                                  bin_bymass = bin_method%in%"equal.mass",
+                                  bin_bydhist = bin_method%in%"dhist",
+                                  max_nperbin = max_n_bin,
+                                  pool = pool)
                                   # subset = subset_vars)
 
   # Create the conditional density, based on the regression just specified and fit it
@@ -238,7 +237,7 @@ fit_density <- function(
 #' @param model_fit An R6 object of class \code{SummariesModel} returned by \code{\link{fit_density}}.
 #' @param newdata A \code{data.table} or \code{data.frame} containing new predictors and IMPORTANTLY the outcomes.
 #' @return A numeric vector containing the likelihood predictions for new observation.
-#' When \code{bin.method = "equal.mass"} the output is a named vector, with the names corresponding to the
+#' When \code{bin_method = "equal.mass"} the output is a named vector, with the names corresponding to the
 #' specific bin percentile of each individual outcome.
 #' @example tests/examples/1_condensier_example.R
 #' @export

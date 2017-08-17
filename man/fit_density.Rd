@@ -4,9 +4,9 @@
 \alias{fit_density}
 \title{Fit (multivariate) conditional density}
 \usage{
-fit_density(X, Y, input_data, bin.method = c("equal.mass", "equal.len",
-  "dhist"), nbins = NA_integer_, maxncats = 20, poolContinVar = FALSE,
-  maxNperBin = 1000, parfit = FALSE, bin_estimator = speedglmR6$new(),
+fit_density(X, Y, input_data, bin_method = c("equal.mass", "equal.len",
+  "dhist"), nbins = NA_integer_, max_n_cat = 20, pool = FALSE,
+  max_n_bin = 1000, parfit = FALSE, bin_estimator = speedglmR6$new(),
   verbose = getOption("condensier.verbose"))
 }
 \arguments{
@@ -16,28 +16,28 @@ fit_density(X, Y, input_data, bin.method = c("equal.mass", "equal.len",
 
 \item{input_data}{Input dataset, can be a \code{data.frame} or a \code{data.table}.}
 
-\item{bin.method}{The method for choosing bins when discretizing and fitting the conditional continuous summary
+\item{bin_method}{The method for choosing bins when discretizing and fitting the conditional continuous summary
 exposure variable \code{sA}. The default method is \code{"equal.len"}, which partitions the range of \code{sA}
 into equal length \code{nbins} intervals. Method \code{"equal.mass"} results in a data-adaptive selection of the bins
 based on equal mass (equal number of observations), i.e., each bin is defined so that it contains an approximately
 the same number of observations across all bins. The maximum number of observations in each bin is controlled
-by parameter \code{maxNperBin}. Method \code{"dhist"} uses a mix of the above two approaches,
+by parameter \code{max_n_bin}. Method \code{"dhist"} uses a mix of the above two approaches,
 see Denby and Mallows "Variations on the Histogram" (2009) for more detail.}
 
 \item{nbins}{Set the default number of bins when discretizing a continous outcome variable under setting
-\code{bin.method = "equal.len"}.
+\code{bin_method = "equal.len"}.
 If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
-\code{nobs}/\code{maxNperBin}, where \code{nobs} is the total number of observations in the input data.}
+\code{nobs}/\code{max_n_bin}, where \code{nobs} is the total number of observations in the input data.}
 
-\item{maxncats}{Max number of unique levels for cat outcome.
+\item{max_n_cat}{Max number of unique levels for cat outcome.
 If the outcome has more levels it is automatically considered continuous.}
 
-\item{poolContinVar}{Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
+\item{pool}{Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
 When fitting a model for binirized continuous outcome, set to \code{TRUE}
 for pooling bin indicators across several bins into one outcome regression?}
 
-\item{maxNperBin}{Max number of observations per 1 bin for a continuous outcome (applies directly when
-\code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).}
+\item{max_n_bin}{Max number of observations per 1 bin for a continuous outcome (applies directly when
+\code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"}, but \code{nbins = NA}).}
 
 \item{parfit}{Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
 \code{foreach} and \code{dopar} to perform
@@ -152,7 +152,7 @@ The evaluation above utilizes a discretization of the fact that any continuous d
 
 There are 3 alternative methods to defining the bin cutoffs S=(i_1,...,i_M,i_{M+1}) for a continuous summary measure
  \code{sA}. The choice of which method is used along with other discretization parameters (e.g., total number of
- bins) is controlled via the tmlenet_options() function. See \code{?tmlenet_options} argument \code{bin.method} for
+ bins) is controlled via the tmlenet_options() function. See \code{?tmlenet_options} argument \code{bin_method} for
  additional details.
 
 Approach 1 (\code{equal.len}): equal length, default.
@@ -160,12 +160,12 @@ Approach 1 (\code{equal.len}): equal length, default.
 *********************
 
 The bins are defined by splitting the range of observed \code{sA} (sa_1,...,sa_n) into equal length intervals.
- This is the dafault discretization method, set by passing an argument \code{bin.method="equal.len"} to
+ This is the dafault discretization method, set by passing an argument \code{bin_method="equal.len"} to
  \code{tmlenet_options} function prior to calling \code{tmlenet()}. The intervals will be defined by splitting the
  range of (sa_1,...,sa_N) into \code{nbins} number of equal length intervals, where \code{nbins} is another argument
  of \code{tmlenet_options()} function. When \code{nbins=NA} (the default setting) the actual value of \code{nbins}
- is computed at run time by taking the integer value (floor) of \code{n/maxNperBin},
- for \code{n} - the total observed sample size and \code{maxNperBin=1000} - another argument of
+ is computed at run time by taking the integer value (floor) of \code{n/max_n_bin},
+ for \code{n} - the total observed sample size and \code{max_n_bin=1000} - another argument of
  \code{tmlenet_options()} with the default value 1,000.
 
 Approach 2 (\code{equal.mass}): data-adaptive equal mass intervals.
@@ -174,19 +174,19 @@ Approach 2 (\code{equal.mass}): data-adaptive equal mass intervals.
 
 The intervals are defined by splitting the range of \code{sA} into non-equal length data-adaptive intervals that
  ensures that each interval contains around
- \code{maxNperBin} observations from (sa_j:j=1,...,N).
- This interval definition approach can be selected by passing an argument \code{bin.method="equal.mass"} to
+ \code{max_n_bin} observations from (sa_j:j=1,...,N).
+ This interval definition approach can be selected by passing an argument \code{bin_method="equal.mass"} to
  \code{tmlenet_options()} prior to calling \code{tmlenet()}.
  The method ensures that an approximately equal number of observations will belong to each interval, where that number
  of observations for each interval
- is controlled by setting \code{maxNperBin}. The default setting is \code{maxNperBin=1000} observations per interval.
+ is controlled by setting \code{max_n_bin}. The default setting is \code{max_n_bin=1000} observations per interval.
 
 Approach 3 (\code{dhist}): combination of 1 & 2.
 
 *********************
 
 The data-adaptive approach dhist is a mix of Approaches 1 & 2. See Denby and Mallows "Variations on the Histogram"
- (2009)). This interval definition method is selected by passing an argument \code{bin.method="dhist"} to
+ (2009)). This interval definition method is selected by passing an argument \code{bin_method="dhist"} to
  \code{tmlenet_options()}  prior to calling \code{tmlenet()}.
 }
 
@@ -208,7 +208,7 @@ dens_fit <- fit_density(
     Y = "sA",
     input_data = datO,
     nbins = 20,
-    bin.method = "equal.mass",
+    bin_method = "equal.mass",
     bin_estimator = speedglmR6$new())
 
 ## Wrapper function to predict the conditional probability (likelihood)
@@ -226,7 +226,7 @@ dens_fit <- fit_density(
     Y = "sA",
     input_data = datO,
     nbins = 20,
-    bin.method = "equal.len",
+    bin_method = "equal.len",
     bin_estimator = speedglmR6$new())
 
 ## Wrapper function to predict the conditional probability (likelihood)
