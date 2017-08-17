@@ -50,7 +50,7 @@
 #' \item{\code{bin_bydhist}} - Logical, if TRUE, use dhist approach for bin definitions.  See Denby and Mallows "Variations on the
 #'    Histogram" (2009)) for more..
 #' \item{\code{max_nperbin}} - Integer, maximum number of observations allowed per one bin.
-#' \item{\code{pool_cont}} - Logical, pool binned continuous outvar observations across bins and only fit only regression model
+#' \item{\code{pool}} - Logical, pool binned continuous outvar observations across bins and only fit only regression model
 #'    across all bins (adding bin_ID as an extra covaraite)..
 #' \item{\code{outvars_to_pool}} - Character vector of names of the binned continuous outvars, should match \code{bin_nms}.
 #' \item{\code{intrvls.width}} - Named numeric vector of bin-widths (\code{bw_j : j=1,...,M}) for each each bin in \code{self$intrvls}.
@@ -70,10 +70,10 @@
 #'                   bin_estimator = getopt("bin_estimator"),
 #'                   parfit = getopt("parfit"),
 #'                   nbins = getopt("nbins"),
-#'                   bin_bymass = getopt("bin.method")%in%"equal.mass",
-#'                   bin_bydhist = getopt("bin.method")%in%"dhist",
-#'                   max_nperbin = getopt("maxNperBin"),
-#'                   pool_cont = getopt("poolContinVar")}}{Uses the arguments to instantiate an object of R6 class and define the future regression model.}
+#'                   bin_bymass = getopt("bin_method")%in%"equal.mass",
+#'                   bin_bydhist = getopt("bin_method")%in%"dhist",
+#'                   max_nperbin = getopt("max_n_bin"),
+#'                   pool = getopt("poolContinVar")}}{Uses the arguments to instantiate an object of R6 class and define the future regression model.}
 #'   \item{\code{ChangeManyToOneRegresssion(k_i, reg)}}{ Take a clone of a parent \code{RegressionClass} (\code{reg}) for \code{length(self$outvar)} regressions
 #'    and set self to a single univariate \code{k_i} regression for outcome \code{self$outvar[[k_i]]}.}
 #'   \item{\code{ChangeOneToManyRegresssions(regs_list)}}{ Take the clone of a parent \code{RegressionClass} for univariate (continuous outvar) regression
@@ -109,7 +109,7 @@ RegressionClass <- R6Class("RegressionClass",
     bin_bymass = logical(),        # for cont outvar, create bin cutoffs based on equal mass distribution?
     bin_bydhist = logical(),       # if TRUE, use dhist approach for bin definitions
     max_nperbin = integer(),       # maximum n observations allowed per binary bin
-    pool_cont = logical(),         # Pool binned cont outvar obs into long format (adding bin_ID as a covaraite)
+    pool = logical(),         # Pool binned cont outvar obs into long format (adding bin_ID as a covaraite)
     outvars_to_pool = character(), # Names of the binned continuous sVars, should match bin_nms
     intrvls.width = 1L,            # Named vector of bin-widths (bw_j : j=1,...,M) for each each bin in self$intrvls
                                    # When sA is not continuous, intrvls.width IS SET TO 1.
@@ -130,7 +130,7 @@ RegressionClass <- R6Class("RegressionClass",
                           bin_bymass = TRUE,
                           bin_bydhist = FALSE,
                           max_nperbin = 1000,
-                          pool_cont = FALSE
+                          pool = FALSE
                           ) {
 
       assert_that(length(outvar.class) == length(outvar))
@@ -154,7 +154,7 @@ RegressionClass <- R6Class("RegressionClass",
       self$bin_bymass <- bin_bymass
       self$bin_bydhist <- bin_bydhist
       self$max_nperbin <- max_nperbin
-      self$pool_cont <- pool_cont
+      self$pool <- pool
 
       if (!missing(intrvls)) {
         assert_that(is.list(intrvls))

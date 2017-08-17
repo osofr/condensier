@@ -8,7 +8,7 @@
 def_regs_subset <- function(self) {
   bin_regs <- self$reg$clone() # instead of defining new RegressionClass now cloning parent reg object and then ADDING new SETTINGS
   bin_regs$reg_hazard <- TRUE # don`t add degenerate bins as predictors in each binary regression
-  if (!self$reg$pool_cont) {
+  if (!self$reg$pool) {
     add.oldsubset <- TRUE
     new.subsets <- lapply(self$reg$bin_nms,
                               function(var) {

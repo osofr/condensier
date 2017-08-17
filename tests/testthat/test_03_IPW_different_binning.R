@@ -38,7 +38,8 @@ test_that("different binning methods should give the right mean predicted probab
                                   subset = subset_vars,
                                   bin_bymass = FALSE,
                                   bin_bydhist = FALSE,
-                                  max_nperbin = 1000
+                                  max_nperbin = 1000,
+                                  pool = FALSE
                                   # nbins = 10
                                   )
 
@@ -120,7 +121,8 @@ test_that("different binning methods should give the right mean predicted probab
                                       subset = subset_vars,
                                       bin_bymass = FALSE,
                                       bin_bydhist = FALSE,
-                                      max_nperbin = 1000)
+                                      max_nperbin = 1000,
+                                      pool = FALSE)
   summeas.g0.glm <- SummariesModel$new(reg = regclass.gml, data_object = data_store_obj)
   summeas.g0.glm$fit(data = data_store_obj)
 
@@ -153,7 +155,8 @@ test_that("different binning methods should give the right mean predicted probab
                                           outvar.class = sA_class,
                                           outvar = reg.sVars$outvars,
                                           predvars = reg.sVars$predvars,
-                                          subset = subset_vars)
+                                          subset = subset_vars,
+                                          pool = FALSE)
   summeas.g0 <- SummariesModel$new(reg = regclass.binmass, data_object = data_store_obj)
   summeas.g0$fit(data = data_store_obj)
   summeas.g0$predict(newdata = data_store_obj)
@@ -164,9 +167,12 @@ test_that("different binning methods should give the right mean predicted probab
   # get get the observed data:
   # data_store_obj$dat.sVar
 
-  # plot densitity first:
-  # plot(density(setWdat_res$setWsA))
-  # lines(datO[subs][["sA"]], h_gN[subs], type = "p", cex = .3, col = "red")
+  ## plot densitity first:
+  plot(density(setWdat_res$setWsA))
+  lines(datO[subs][["sA"]], h_gN[subs], type = "p", cex = .3, col = "red")
+
+  plot(datO[subs][["sA"]], h_gN[subs], type = "p", cex = .3, col = "red")
+  lines(density(setWdat_res$setWsA))
 
   # ---------------------------------------------------------------------------------------------------------
   # **** Same fit as before but binning using "dhist" function & regressions with speedglm ****
@@ -179,7 +185,8 @@ test_that("different binning methods should give the right mean predicted probab
                                           outvar.class = sA_class,
                                           outvar = reg.sVars$outvars,
                                           predvars = reg.sVars$predvars,
-                                          subset = subset_vars)
+                                          subset = subset_vars,
+                                          pool = FALSE)
   summeas.g0 <- SummariesModel$new(reg = regclass.bidhist, data_object = data_store_obj)
   summeas.g0$fit(data = data_store_obj)
 

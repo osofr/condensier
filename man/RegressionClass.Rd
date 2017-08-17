@@ -53,7 +53,7 @@ This R6 class defines fields and methods that controls all the parameters for no
 \item{\code{bin_bydhist}} - Logical, if TRUE, use dhist approach for bin definitions.  See Denby and Mallows "Variations on the
    Histogram" (2009)) for more..
 \item{\code{max_nperbin}} - Integer, maximum number of observations allowed per one bin.
-\item{\code{pool_cont}} - Logical, pool binned continuous outvar observations across bins and only fit only regression model
+\item{\code{pool}} - Logical, pool binned continuous outvar observations across bins and only fit only regression model
    across all bins (adding bin_ID as an extra covaraite)..
 \item{\code{outvars_to_pool}} - Character vector of names of the binned continuous outvars, should match \code{bin_nms}.
 \item{\code{intrvls.width}} - Named numeric vector of bin-widths (\code{bw_j : j=1,...,M}) for each each bin in \code{self$intrvls}.
@@ -75,10 +75,10 @@ This R6 class defines fields and methods that controls all the parameters for no
                   bin_estimator = getopt("bin_estimator"),
                   parfit = getopt("parfit"),
                   nbins = getopt("nbins"),
-                  bin_bymass = getopt("bin.method")%in%"equal.mass",
-                  bin_bydhist = getopt("bin.method")%in%"dhist",
-                  max_nperbin = getopt("maxNperBin"),
-                  pool_cont = getopt("poolContinVar")}}{Uses the arguments to instantiate an object of R6 class and define the future regression model.}
+                  bin_bymass = getopt("bin_method")%in%"equal.mass",
+                  bin_bydhist = getopt("bin_method")%in%"dhist",
+                  max_nperbin = getopt("max_n_bin"),
+                  pool = getopt("poolContinVar")}}{Uses the arguments to instantiate an object of R6 class and define the future regression model.}
   \item{\code{ChangeManyToOneRegresssion(k_i, reg)}}{ Take a clone of a parent \code{RegressionClass} (\code{reg}) for \code{length(self$outvar)} regressions
    and set self to a single univariate \code{k_i} regression for outcome \code{self$outvar[[k_i]]}.}
   \item{\code{ChangeOneToManyRegresssions(regs_list)}}{ Take the clone of a parent \code{RegressionClass} for univariate (continuous outvar) regression

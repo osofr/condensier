@@ -18,20 +18,20 @@ NULL
 # DETECTING VECTOR TYPES
 # sVartypes <- list(bin = "binary", cat = "categor", cont = "contin")
 ## ---------------------------------------------------------------------
-detect.col.types <- function(sVar_mat, Yvars, maxncats){
+detect.col.types <- function(sVar_mat, Yvars, max_n_cat){
   detect_vec_type <- function(vec) {
     vec_nomiss <- vec[!gvars$misfun(vec)]
     nvals <- length(unique(vec_nomiss))
     if (nvals <= 2L) {
       sVartypes$bin
-    } else if ((nvals <= maxncats) && (is.integerish(vec_nomiss))) {
+    } else if ((nvals <= max_n_cat) && (is.integerish(vec_nomiss))) {
       sVartypes$cat
     } else {
       sVartypes$cont
     }
   }
 
-  assert_that(is.integerish(maxncats) && (maxncats > 1))
+  assert_that(is.integerish(max_n_cat) && (max_n_cat > 1))
   sVartypes <- gvars$sVartypes
 
   if (missing(Yvars)) Yvars <- colnames(sVar_mat)
@@ -184,7 +184,7 @@ DataStore <- R6Class(classname = "DataStore",
   portable = TRUE,
   class = TRUE,
   public = list(
-    maxncats = NULL,           # Max number of unique levels for cat outcome. If the outcome has more levels it is automatically considered continuous.
+    max_n_cat = NULL,           # Max number of unique levels for cat outcome. If the outcome has more levels it is automatically considered continuous.
     mat.sVar = NULL,           # Matrix storing all evaluated sVars, with named columns
     type.sVar = NULL,          # named list with sVar types: list(names.sVar[i] = "binary"/"categor"/"contin"), can be overridden
     norm.c.sVars = FALSE,      # flag = TRUE if want to normalize continous covariates
@@ -192,12 +192,12 @@ DataStore <- R6Class(classname = "DataStore",
     mat.bin.sVar = NULL,       # temp storage mat for bin indicators on currently binarized continous sVar (from self$active.bin.sVar)
     ord.sVar = NULL,           # Ordinal (cat) transform for continous sVar
 
-    initialize = function(input_data, X, Y, auto_typing = TRUE, maxncats = 20, ...) {
+    initialize = function(input_data, X, Y, auto_typing = TRUE, max_n_cat = 20, ...) {
       if (!is.data.table(input_data)) data.table::setDT(input_data)
       self$dat.sVar <- input_data
       self$nodes <- list(X = X, Y = Y)
 
-      self$maxncats <- maxncats
+      self$max_n_cat <- max_n_cat
 
       ## We need to evaluate the types of OUTCOME VARIABLES ONLY (the types of predictors are irrelevant)
       if (auto_typing) self$def.types.sVar(Y = Y) # Define the type of each Y: bin, cat or cont
@@ -214,7 +214,7 @@ DataStore <- R6Class(classname = "DataStore",
     def.types.sVar = function(type.sVar = NULL, Y) {
       # Detect the type of each sVar[i]: gvars$sVartypes$bin,  gvars$sVartypes$cat, gvars$sVartypes$cont
       if (is.null(type.sVar)) {
-        self$type.sVar <- detect.col.types(self$dat.sVar, Y, self$maxncats)
+        self$type.sVar <- detect.col.types(self$dat.sVar, Y, self$max_n_cat)
       } else {
         n.sVar <- length(self$names.sVar)
         len <- length(type.sVar)
@@ -311,7 +311,11 @@ DataStore <- R6Class(classname = "DataStore",
           sel.binsA <- NULL
         }
         if (length(sel.binsA)>0) {
-          dfsel <- cbind(dfsel, self$dat.bin.sVar[rowsubset, sel.binsA, drop = FALSE])
+          if (ncol(dfsel)==0) {
+            dfsel <- as.data.table(self$dat.bin.sVar[rowsubset, sel.binsA, drop = FALSE])
+          } else {
+            dfsel <- cbind(dfsel, self$dat.bin.sVar[rowsubset, sel.binsA, drop = FALSE])
+          }
         }
 
         found_vars <- covars %in% colnames(dfsel)
@@ -344,7 +348,7 @@ DataStore <- R6Class(classname = "DataStore",
 
     },
 
-    # Need to find a way to over-ride nbins for categorical vars (allowing it to be set to more than gvars$maxncats)!
+    # Need to find a way to over-ride nbins for categorical vars (allowing it to be set to more than gvars$max_n_cat)!
     # Return names of bin indicators for sVar:
     bin.nms.sVar = function(name.sVar, nbins) { name.sVar%+%"_"%+%"B."%+%(1L:nbins) },
     pooled.bin.nm.sVar = function(name.sVar) { name.sVar %+% "_allB.j" },

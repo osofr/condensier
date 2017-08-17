@@ -21,7 +21,7 @@ test_that("categorical variable can be binned in various ways, including it bein
 # test.detect.int.sA <- function() {
   nsamp <- 1000
   nbins <- 10
-  # oldopts <- condensier_options(maxncats = 5, nbins = nbins)
+  # oldopts <- condensier_options(max_n_cat = 5, nbins = nbins)
   # ----------------------------------------------------------------------------------------
   # Continuous
   # ----------------------------------------------------------------------------------------
@@ -29,14 +29,14 @@ test_that("categorical variable can be binned in various ways, including it bein
   data.table::setDT(datO)
   Kmax <- 10L
   datO[, "nF" := sample(1L:Kmax, nrow(datO), replace = TRUE)]
-  datNetObs <- DataStore$new(input_data = datO, Y = "nF", X = c("W1", "W2", "W3", "nF"), maxncats = 5)
+  datNetObs <- DataStore$new(input_data = datO, Y = "nF", X = c("W1", "W2", "W3", "nF"), max_n_cat = 5)
 
   # ----------------------------------------------------------------------------------------
   # ******** THIS IS PRETTY BAD. THE RESULT COLLAPSES nF TO 3/4 categories only ***********
-  # Categorical w maxncats < ncats, so gets detected as contin and categories get collapsed
+  # Categorical w max_n_cat < ncats, so gets detected as contin and categories get collapsed
   # ----------------------------------------------------------------------------------------
   # datNetObs <- makedat(nsamp=nsamp, Kmax=10)
-  # condensier_options(maxncats = 5, nbins = 10)
+  # condensier_options(max_n_cat = 5, nbins = 10)
   obsdat.sW <- datNetObs$dat.sVar
   head(obsdat.sW,10)
   table(obsdat.sW[["nF"]])
@@ -276,7 +276,7 @@ test.catnet.fit.density.iptw <- function() {
                                       subset = subset_vars,
                                       bin_bymass = TRUE,
                                       max_nperbin = 500,
-                                      pool_cont = FALSE,
+                                      pool = FALSE,
                                       bin_estimator = speedglmR6$new(),
                                       parfit = FALSE)
   # -------------------------------------------------------------------------------------------

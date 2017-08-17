@@ -5,8 +5,8 @@
 \title{(RETIRED) Setting Options for \code{condensier}}
 \usage{
 condensier_options(bin_estimator = speedglmR6$new(), parfit = FALSE,
-  bin.method = c("equal.len", "equal.mass", "dhist"), nbins = NA,
-  maxncats = 20, poolContinVar = FALSE, maxNperBin = 1000)
+  bin_method = c("equal.len", "equal.mass", "dhist"), nbins = NA,
+  max_n_cat = 20, poolContinVar = FALSE, max_n_bin = 1000)
 }
 \arguments{
 \item{bin_estimator}{The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
@@ -19,28 +19,28 @@ requires registering a parallel backend prior to running \code{condensier} funct
 using \code{doParallel} R package and running \code{registerDoParallel(cores = ncores)} for integer
 \code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".}
 
-\item{bin.method}{The method for choosing bins when discretizing and fitting the conditional continuous summary
+\item{bin_method}{The method for choosing bins when discretizing and fitting the conditional continuous summary
 exposure variable \code{sA}. The default method is \code{"equal.len"}, which partitions the range of \code{sA}
 into equal length \code{nbins} intervals. Method \code{"equal.mass"} results in a data-adaptive selection of the bins
 based on equal mass (equal number of observations), i.e., each bin is defined so that it contains an approximately
 the same number of observations across all bins. The maximum number of observations in each bin is controlled
-by parameter \code{maxNperBin}. Method \code{"dhist"} uses a mix of the above two approaches,
+by parameter \code{max_n_bin}. Method \code{"dhist"} uses a mix of the above two approaches,
 see Denby and Mallows "Variations on the Histogram" (2009) for more detail.}
 
 \item{nbins}{Set the default number of bins when discretizing a continous outcome variable under setting
-\code{bin.method = "equal.len"}.
+\code{bin_method = "equal.len"}.
 If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
-\code{nobs}/\code{maxNperBin}, where \code{nobs} is the total number of observations in the input data.}
+\code{nobs}/\code{max_n_bin}, where \code{nobs} is the total number of observations in the input data.}
 
-\item{maxncats}{Max number of unique categories a categorical variable \code{sA[j]} can have.
+\item{max_n_cat}{Max number of unique categories a categorical variable \code{sA[j]} can have.
 If \code{sA[j]} has more it is automatically considered continuous.}
 
 \item{poolContinVar}{Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
 When fitting a model for binirized continuous outcome, set to \code{TRUE}
 for pooling bin indicators across several bins into one outcome regression?}
 
-\item{maxNperBin}{Max number of observations per 1 bin for a continuous outcome (applies directly when
-\code{bin.method="equal.mass"} and indirectly when \code{bin.method="equal.len"}, but \code{nbins = NA}).}
+\item{max_n_bin}{Max number of observations per 1 bin for a continuous outcome (applies directly when
+\code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"}, but \code{nbins = NA}).}
 }
 \value{
 Invisibly returns a list with old option settings.
