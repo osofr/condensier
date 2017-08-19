@@ -170,9 +170,9 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
       if (gvars$verbose) print("performing prediction for categorical outcome: " %+% self$outvar)
       bws <- newdata$get.sVar.bw(name.sVar = self$outvar, intervals = self$intrvls)
       self$bin_weights <- (1 / bws) # weight based on 1 / (sVar bin widths)
-      # Option 1: ADJUST FINAL PROB by bw.j TO OBTAIN density at a point f(sa|sw) = P(sA=sa|sW=sw):
+      # OPTION 1: Adjust final prob. by bw.j TO OBTAIN density (likelihood) at a point (bin) f(sa|sw) = P(sA=sa|sW=sw):
       cumprodAeqa <- super$predictAeqa(newdata = newdata) * self$bin_weights
-      # Alternative 2: ALso integrate the difference of sA value and its left most bin cutoff: x - b_{j-1} and pass it
+      # OPTION 2: Integrate the difference of sA value and its left most bin cutoff: x - b_{j-1} and pass it
       # This is done so that we can integrate the constant hazard all the way to the value of x:
         # * (1 - bw.j.sA_diff*(1/self$bin_weights)*probA1) (discrete)
         # * exp(-bw.j.sA_diff*(1/self$bin_weights)*probA1) (continuous)

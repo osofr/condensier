@@ -58,6 +58,78 @@ Wrapper function to sample the values from the conditional density fit:
 sampledY <- sample_value(dens_fit, newdata)
 ```
 
+
+### Fitting Super Learner density with `sl3` package
+
+Any binary-outcome regression learner available in `sl3` package can be used as a "drop-in" learner for conditional bin hazard. Below, we use `xgboost` R package implementation of GMB for estimation of the bin hazards (hazards are pooled across all bins into a single dataset, a single regression fit is then performed across all bins).
+
+```R
+library(sl3)
+lrn <- Lrnr_condensier$new(task, nbins = 35, bin_method = "equal.len", pool = TRUE, bin_estimator = 
+  Lrnr_xgboost$new(nrounds = 50, objective = "reg:logistic"))
+```
+
+Finally, multiple candidate density estimators can be optimally stacked or combined with a Super Learner. The convex combination of the candidates is found by minimizing the cross-validated negative loglikelihood loss function. In this example we define 3 candidate density learners:
+
+```R
+lrn1 <- Lrnr_condensier$new(task, nbins = 25, bin_method = "equal.len", pool = TRUE, 
+  bin_estimator = Lrnr_glm_fast$new(family = "binomial"))
+lrn2 <- Lrnr_condensier$new(task, nbins = 20, bin_method = "equal.mass", pool = TRUE,
+  bin_estimator = Lrnr_xgboost$new(nrounds = 50, objective = "reg:logistic"))
+lrn3 <- Lrnr_condensier$new(task, nbins = 35, bin_method = "equal.len", pool = TRUE,
+  bin_estimator = Lrnr_xgboost$new(nrounds = 50, objective = "reg:logistic"))
+```
+
+We proceed by training the Super Learner (with 10 fold cross-validation) and then finding the optimal convex combination of the candidate densities with the meta-learner `Lrnr_solnp_density`:
+```R
+sl <- Lrnr_sl$new(learners = list(lrn1, lrn2, lrn3),
+                  metalearner = Lrnr_solnp_density$new())
+sl_fit <- sl$train(task)
+```
+
+To predict for new data, wrap the desired dataset into an `sl3-task` object and call predict on above `sl_fit` object:
+```R
+newdata <- datO[1:5, c("W1", "W2", "W3", "sA")]
+new_task <- sl3_Task$new(newdata, covariates=c("W1", "W2", "W3"),outcome="sA" )
+sl_fit$predict(new_task)
+```
+
+
+### Nesting the Super Learner for bin hazards with density Super Learner
+
+Note that the `bin_estimator` can also be a Super-Learner object from `sl3`, that itself consists of multiple candidate estimators. In this case a single super-learner fit will be automatically obtain for the bin hazard, as shown below. In this case, the Super-Learner fit will be optimized for the logistic regression problem (fitting bin hazards), with internal 10 fold CV. 
+
+```R
+library(sl3)
+lrn <- Lrnr_condensier$new(task, nbins = 35, bin_method = "equal.len", pool = TRUE, bin_estimator = 
+  Lrnr_sl$new(
+    learners = list(
+      Lrnr_glm_fast$new(family = "binomial"),
+      Lrnr_xgboost$new(nrounds = 50, objective = "reg:logistic")
+      ),
+    metalearner = Lrnr_glm$new()
+    ))
+binSL_fit <- lrn$train(task)
+```
+
+Thus, in prinicple, one can nest the two of the above types of Super Learners, the Super Learner that fits the bin hazard of each candidate density and the Super Learner that finds the optimal combination of the candidate densities. However, due to performance constraints we currently advise against that. 
+
+### Stacking and cross-validating candidate densities with `sl3` package
+
+One can build a custom version of their own Super Learner by using the stacking and cross-validation procedures availabe in `sl3`. Here we define a stack of 3 learners, then train all 3 and predict for new data (likelihood):
+```R
+learner_stack <- Stack$new(lrn1, lrn2, lrn3)
+stack_fit <- learner_stack$train(task)
+preds <- stack_fit$predict(new_task)
+```
+
+Here we cross-validate all 3 learners in the stack, using the default 10-fold CV:
+```R
+cv_stack <- Lrnr_cv$new(learner_stack)
+cv_fit <- cv_stack$train(task)
+```
+
+
 ### Funding
 The development of this package was funded through an NIH grant (R01 AI074345-07).
 
