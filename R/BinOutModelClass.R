@@ -191,7 +191,7 @@ BinDat <- R6Class(classname = "BinDat",
       self$n <- data$nobs
       self$subset_idx <- self$define.subset_idx(data)
       if (getoutvar) private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # Always a vector
-      if (sum(self$subset_idx) == 0L || length(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
+      if (length(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
         # private$X_mat <- data.table::as.data.table(matrix(, nrow = 0L, ncol = (length(self$predvars) + 1)))
         private$X_mat <- data.table::as.data.table(matrix(, nrow = 0L, ncol = (length(self$predvars))))
         # colnames(private$X_mat) <- c("Intercept", self$predvars)
