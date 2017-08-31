@@ -77,7 +77,7 @@ define.intervals <- function(x, nbins, bin_bymass, bin_bydhist, max_nperbin) {
     bin_bymass <- FALSE
   }
   if (abs(max(x) - min(x)) > gvars$tolerr) {  # when x is not constant
-    if ((bin_bymass) & !is.null(max_nperbin)) {
+    if ((bin_bymass) & !is.na(max_nperbin)) {
       if ((length(x) / max_nperbin) > nbins) nbins <- as.integer(length(x) / max_nperbin)
     }
     intvec <- seq.int(from = min(x), to = max(x) + 1, length.out = (nbins + 1)) # interval type 1: bin x by equal length intervals of 0-1

@@ -5,8 +5,9 @@
 \title{Fit (multivariate) conditional density}
 \usage{
 fit_density(X, Y, input_data, bin_method = c("equal.mass", "equal.len",
-  "dhist"), nbins = NA_integer_, max_n_cat = 20, pool = FALSE,
-  max_n_bin = 1000, parfit = FALSE, bin_estimator = speedglmR6$new(),
+  "dhist"), nbins = 5, max_n_cat = 20, pool = FALSE,
+  max_n_bin = NA_integer_, parfit = FALSE,
+  bin_estimator = speedglmR6$new(),
   verbose = getOption("condensier.verbose"))
 }
 \arguments{
@@ -25,9 +26,10 @@ by parameter \code{max_n_bin}. Method \code{"dhist"} uses a mix of the above two
 see Denby and Mallows "Variations on the Histogram" (2009) for more detail.}
 
 \item{nbins}{Set the default number of bins when discretizing a continous outcome variable under setting
-\code{bin_method = "equal.len"}.
-If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
-\code{nobs}/\code{max_n_bin}, where \code{nobs} is the total number of observations in the input data.}
+ \code{bin_method = "equal.len"}.
+ If set to \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
+ \code{nobs}/\code{max_n_bin}, where \code{nobs} is the total number of observations in the input data.
+Default value is 5.}
 
 \item{max_n_cat}{Max number of unique levels for cat outcome.
 If the outcome has more levels it is automatically considered continuous.}
@@ -36,8 +38,9 @@ If the outcome has more levels it is automatically considered continuous.}
 When fitting a model for binirized continuous outcome, set to \code{TRUE}
 for pooling bin indicators across several bins into one outcome regression?}
 
-\item{max_n_bin}{Max number of observations per 1 bin for a continuous outcome (applies directly when
-\code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"}, but \code{nbins = NA}).}
+\item{max_n_bin}{Max number of observations per single bin for a continuous outcome (applies directly when
+ \code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"} but \code{nbins = NA}).
+Default is \code{NA_integer_}.}
 
 \item{parfit}{Default is \code{FALSE}. Set to \code{TRUE} to use \code{foreach} package and its functions
 \code{foreach} and \code{dopar} to perform

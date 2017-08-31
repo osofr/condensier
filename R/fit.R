@@ -22,15 +22,17 @@
 #'  \code{ncores} parallel jobs. For an example, see a test in "./tests/RUnit/RUnit_tests_04_netcont_sA_tests.R".
 #' @param nbins Set the default number of bins when discretizing a continous outcome variable under setting
 #'  \code{bin_method = "equal.len"}.
-#'  If left as \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
+#'  If set to \code{NA} the total number of equal intervals (bins) is determined by the nearest integer of
 #'  \code{nobs}/\code{max_n_bin}, where \code{nobs} is the total number of observations in the input data.
+#' Default value is 5.
 #' @param max_n_cat Max number of unique levels for cat outcome.
 #' If the outcome has more levels it is automatically considered continuous.
 #' @param pool Set to \code{TRUE} for fitting a pooled regression which pools bin indicators across all bins.
 #' When fitting a model for binirized continuous outcome, set to \code{TRUE}
 #' for pooling bin indicators across several bins into one outcome regression?
-#' @param max_n_bin Max number of observations per 1 bin for a continuous outcome (applies directly when
-#'  \code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"}, but \code{nbins = NA}).
+#' @param max_n_bin Max number of observations per single bin for a continuous outcome (applies directly when
+#'  \code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"} but \code{nbins = NA}).
+#' Default is \code{NA_integer_}.
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
 #'
@@ -168,10 +170,10 @@ fit_density <- function(
                       Y,
                       input_data,
                       bin_method = c("equal.mass", "equal.len", "dhist"),
-                      nbins = NA_integer_,
+                      nbins = 5,
                       max_n_cat = 20,
                       pool = FALSE,
-                      max_n_bin = 1000,
+                      max_n_bin = NA_integer_,
                       parfit = FALSE,
                       bin_estimator = speedglmR6$new(),
                       verbose = getOption("condensier.verbose")
@@ -205,8 +207,6 @@ fit_density <- function(
 
   # Find the class of the provided variable
   outcome.class <- data_store_obj$type.sVar[Y]
-
-  # subset_vars <- lapply(Y, function(var) {var})
 
   # Put all est_params in RegressionClass
   regclass <- RegressionClass$new(bin_estimator = bin_estimator,
