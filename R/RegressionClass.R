@@ -115,14 +115,14 @@ RegressionClass <- R6Class("RegressionClass",
                                    # When sA is not continuous, intrvls.width IS SET TO 1.
                                    # When sA is continuous, intrvls.width is SET TO self$intrvls.width INSIDE ContinSummaryModel$new() with names(intrvls.width) <- reg$bin_nms
                                    # CAN BE QUERIED BY BinOutModel$predictAeqa() as: intrvls.width[outvar]
-    intrvls = numeric(),           # Vector of numeric cutoffs defining the bins or a named list of numeric intervals (for length(self$outvar) > 1)
+    intrvls = NULL,                # Vector of numeric cutoffs defining the bins or a named list of numeric intervals (for length(self$outvar) > 1)
     levels = NULL,
     # family = NULL,               # (NOT IMPLEMENTED) to run w/ other than "binomial" family
     # form = NULL,                 # (NOT IMPLEMENTED) reg formula, if provided run using the usual glm / speedglm functions
     # Adding ReplMisVal0 = TRUE below for case sA = (netA, sA[j]) with sA[j] continuous, was causing an error otherwise
     initialize = function(sep_predvars_sets = FALSE,
                           outvar.class = gvars$sVartypes$bin,
-                          outvar, predvars, subset, intrvls,
+                          outvar, predvars, subset, intrvls = NULL,
                           ReplMisVal0 = TRUE,
                           bin_estimator = speedglmR6$new(),
                           parfit = FALSE,
@@ -157,10 +157,12 @@ RegressionClass <- R6Class("RegressionClass",
       self$pool <- pool
 
       if (!missing(intrvls)) {
-        assert_that(is.list(intrvls))
-        assert_that(length(outvar) == length(intrvls))
-        assert_that(all(names(intrvls) %in% outvar))
-        self$intrvls <- intrvls
+        if (!is.null(intrvls)) {
+          assert_that(is.list(intrvls))
+          assert_that(length(outvar) == length(intrvls))
+          assert_that(all(names(intrvls) %in% outvar))
+          self$intrvls <- intrvls
+        }
       } else {
         self$intrvls <- NULL
       }

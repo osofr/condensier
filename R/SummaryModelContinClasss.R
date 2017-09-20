@@ -93,6 +93,7 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
     initialize = function(reg, data_object, DataStore.gstar, ...) {
       self$reg <- reg
       self$outvar <- reg$outvar
+
       if (is.null(reg$intrvls)) {
         assert_that(is.DataStore(data_object))
         self$intrvls <- data_object$detect.sVar.intrvls(reg$outvar,
@@ -124,7 +125,9 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
       names(self$reg$intrvls.width) <- names(self$intrvls.width) <- self$reg$bin_nms
       if (gvars$verbose)  {
         print("ContinSummaryModel outcome: "%+%self$outvar)
-        # print("ContinSummaryModel reg$nbins: " %+% self$reg$nbins)
+        print("ContinSummaryModel reg$nbins: " %+% self$reg$nbins)
+        print("ContinSummaryModel self$intrvls: "); print(sprintf("%f", self$intrvls))
+        print("ContinSummaryModel self$intrvls.width: "); print(self$intrvls.width)
       }
       bin_regs <- def_regs_subset(self = self)
       super$initialize(reg = bin_regs, no_set_outvar = TRUE, ...)

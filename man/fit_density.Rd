@@ -7,7 +7,7 @@
 fit_density(X, Y, input_data, bin_method = c("equal.mass", "equal.len",
   "dhist"), nbins = 5, max_n_cat = 20, pool = FALSE,
   max_n_bin = NA_integer_, parfit = FALSE,
-  bin_estimator = speedglmR6$new(),
+  bin_estimator = speedglmR6$new(), intrvls = NULL,
   verbose = getOption("condensier.verbose"))
 }
 \arguments{
@@ -51,6 +51,12 @@ using \code{doParallel} R package and running \code{registerDoParallel(cores = n
 
 \item{bin_estimator}{The estimator to use for fitting the binary outcomes (defaults to \code{speedglmR6} which estimates with \code{\link{speedglmR6}})
 another default option is \code{\link{glmR6}}.}
+
+\item{intrvls}{A named list of intervals, one for each outcome variable. Each list item consists of a
+vector of numeric cutoffs that define the bins.
+By default the bins are defined automatically (based on the selected binning method).
+When this argument is used it will over-ride automatic bin selection. This options should be
+only used when fine-tuned control over bin definitions is desired.}
 
 \item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
 Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
@@ -239,4 +245,26 @@ preds <- predict_probability(dens_fit, newdata)
 
 ## Wrapper function to sample the values from the conditional density fit:
 sampledY <- sample_value(dens_fit, newdata)
+
+
+## Fit conditional density using custom bin definitions (argument intrvls):
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    bin_estimator = speedglmR6$new(),
+    intrvls = list(sA = seq(-4,4, by = 0.1)))
+
+
+## Fit conditional density using custom bin definitions and
+## pool all bin indicators into a single long-format dataset.
+## The pooling results in a single regression that is fit for all bin hazards,
+## with a bin indicator added as an additional covariate.
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    bin_estimator = speedglmR6$new(),
+    intrvls = list(sA = seq(-4,4, by = 0.1)),
+    pool = TRUE)
 }

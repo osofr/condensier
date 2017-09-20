@@ -33,6 +33,11 @@
 #' @param max_n_bin Max number of observations per single bin for a continuous outcome (applies directly when
 #'  \code{bin_method="equal.mass"} and indirectly when \code{bin_method="equal.len"} but \code{nbins = NA}).
 #' Default is \code{NA_integer_}.
+#' @param intrvls A named list of intervals, one for each outcome variable. Each list item consists of a
+#' vector of numeric cutoffs that define the bins.
+#' By default the bins are defined automatically (based on the selected binning method).
+#' When this argument is used it will over-ride automatic bin selection. This options should be
+#' only used when fine-tuned control over bin definitions is desired.
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
 #'
@@ -176,6 +181,7 @@ fit_density <- function(
                       max_n_bin = NA_integer_,
                       parfit = FALSE,
                       bin_estimator = speedglmR6$new(),
+                      intrvls = NULL,
                       verbose = getOption("condensier.verbose")
                       ) {
 
@@ -218,7 +224,8 @@ fit_density <- function(
                                   bin_bymass = bin_method%in%"equal.mass",
                                   bin_bydhist = bin_method%in%"dhist",
                                   max_nperbin = max_n_bin,
-                                  pool = pool)
+                                  pool = pool,
+                                  intrvls = intrvls)
                                   # subset = subset_vars)
 
   # Create the conditional density, based on the regression just specified and fit it
