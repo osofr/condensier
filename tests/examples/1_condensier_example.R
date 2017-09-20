@@ -43,3 +43,25 @@ preds <- predict_probability(dens_fit, newdata)
 
 ## Wrapper function to sample the values from the conditional density fit:
 sampledY <- sample_value(dens_fit, newdata)
+
+
+## Fit conditional density using custom bin definitions (argument intrvls):
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    bin_estimator = speedglmR6$new(),
+    intrvls = list(sA = seq(-4,4, by = 0.1)))
+
+
+## Fit conditional density using custom bin definitions and
+## pool all bin indicators into a single long-format dataset.
+## The pooling results in a single regression that is fit for all bin hazards,
+## with a bin indicator added as an additional covariate.
+dens_fit <- fit_density(
+    X = c("W1", "W2", "W3"),
+    Y = "sA",
+    input_data = datO,
+    bin_estimator = speedglmR6$new(),
+    intrvls = list(sA = seq(-4,4, by = 0.1)),
+    pool = TRUE)
