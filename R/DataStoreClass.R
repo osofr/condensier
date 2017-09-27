@@ -516,3 +516,4 @@ DataStore <- R6Class(classname = "DataStore",
     .nodes = list()           # names of the nodes in the data (Anode, Ynode, nFnode, etc..)
   )
 )
+

@@ -217,7 +217,7 @@ ContinSummaryModel <- R6Class(classname = "ContinSummaryModel",
         if (current_dat == 1) {
           self$intrvls[current_dat+1] - rexp(length(current_dat), rate)
         } else if (current_dat == (length(self$intrvls) - 1)) {
-          self$intrvls[current_dat] +  rexp(length(current_dat), rate)
+          self$intrvls[current_dat] + rexp(length(current_dat), rate)
         } else {
           runif(length(current_dat), self$intrvls[current_dat], self$intrvls[current_dat+1])
         }

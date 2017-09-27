@@ -478,8 +478,9 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
       # private$probAeqa <- probAeqa # NOTE disabling internal saving of probAeqa
       # **********************************************************************
 
-      # frbl: Should we check this? Currently it won't be correct, but we might want to have probabilities that sum to one?
-      #assert_that(!any(probAeqa > 1)) # check that no predictions are greater than one
+      # frbl: Should we check this? Currently it won't be correct, but we might
+      # want to have probabilities that sum to one?
+      # assert_that(!any(probAeqa > 1)) # check that no predictions are greater than one
       return(probAeqa)
     },
 
