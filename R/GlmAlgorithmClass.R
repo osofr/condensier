@@ -12,7 +12,10 @@ logisfitR6 <- R6Class("logisfitR6",
          },
 
          predict.long = function(datsum_obj, m.fit) {
-           if (gvars$verbose) print(paste("calling predict.long for", self$fitfunname))
+           if (gvars$verbose) {
+             print(paste("calling predict.long for", self$fitfunname))
+           }
+           # want to add a weights argument to the data storage class here
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
            assert_that(!is.null(datsum_obj));assert_that(!is.null(X_mat));
