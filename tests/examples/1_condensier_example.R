@@ -51,6 +51,7 @@ dens_fit <- fit_density(
     Y = "sA",
     input_data = datO,
     bin_estimator = speedglmR6$new(),
+    nbins = 5,
     intrvls = list(sA = seq(-4,4, by = 0.1)))
 
 
@@ -64,4 +65,5 @@ dens_fit <- fit_density(
     input_data = datO,
     bin_estimator = speedglmR6$new(),
     intrvls = list(sA = seq(-4,4, by = 0.1)),
+    nbins = 5,
     pool = TRUE)

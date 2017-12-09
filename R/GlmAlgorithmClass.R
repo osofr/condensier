@@ -6,7 +6,7 @@ logisfitR6 <- R6Class("logisfitR6",
   public =
     list(
          lmclass = NULL,
-         fitfunname = NULL,
+         fitfunName = NULL,
          initialize = function() {
            self$get_validity
          },

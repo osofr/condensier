@@ -6,7 +6,7 @@ Authors@R: c(
     person("Frank", "Blaauw", role="aut", email="f.j.blaauw@rug.nl"),
     person("Antoine", "Chambaz", role="aut", email="achambaz@u-paris10.fr"),
     person(c("Mark", "J."), "van der Laan", role="aut", email="laan@berkeley.edu"))
-Description: Semi-parametric conditional density estimation with histograms.
+Description: Nonparametric conditional density estimation with binned histograms.
 URL: https://github.com/osofr/condensier
 BugReports: https://github.com/osofr/condensier/issues
 Depends:
