@@ -21,14 +21,14 @@ NULL
 # Convert existing Bin matrix (Bin indicators) for continuous self$outvar into long format data.table with 3 columns:
 # ID - row number; sVar_allB.j - bin indicators collapsed into one col; bin_ID - bin number identify for prev. columns
 # automatically removed all missing (degenerate) bin indicators
-binirized.to.DTlong <- function(BinsDat_wide, binID_seq, ID, bin_names, pooled_bin_name, name.sVar, predvars) {
+binirized.to.DTlong <- function(BinsDat_wide, binID_seq, ID, bin_names, pooled_bin_name, name.sVar, predvars, weights = NULL) {
   assert_that(is.data.table(BinsDat_wide))
   ## Add row IDs to Bin Mat:
   BinsDat_wide[, c("ID") := ID]
   data.table::setcolorder(BinsDat_wide, c("ID", names(BinsDat_wide)[-ncol(BinsDat_wide)]))
   ## melt into long format, remove all rows with NA value for outcome (degenerate bins)
   sVar_melt_DT <- melt(BinsDat_wide,
-                      id.vars = c("ID", predvars),
+                      id.vars = c("ID", predvars, weights),
                       measure.vars = bin_names,
                       value.name = pooled_bin_name,
                       variable.name = name.sVar,
@@ -122,6 +122,7 @@ BinDat <- R6Class(classname = "BinDat",
     n = NA_integer_,        # number of rows in the input data
     subset_expr = NULL,     # PASS THE LOGICAL EXPRESSIONS TO self$subset WHICH WILL BE EVALUTED IN THE ENVIRONMENT OF THE data
     subset_idx = NULL,      # Logical vector of length n (TRUE = include the obs)
+    weights = NULL,
 
     initialize = function(reg, ...) {
       assert_that(is.string(reg$outvar))
@@ -133,6 +134,7 @@ BinDat <- R6Class(classname = "BinDat",
       self$outvars_to_pool <- reg$outvars_to_pool
       self$ReplMisVal0 <- reg$ReplMisVal0
       self$nbins <- reg$nbins
+      self$weights = reg$weights
       # if (is.null(reg$subset)) {self$subset_expr <- TRUE}
       # if (is.null(reg$subset)) {self$subset_expr <- NULL}
       assert_that(is.logical(self$subset_expr) || is.call(self$subset_expr) || is.character(self$subset_expr) || is.null(self$subset_expr))
@@ -174,27 +176,21 @@ BinDat <- R6Class(classname = "BinDat",
       } else if (is.character(self$subset_expr)) {
         subset_idx <- data$evalsubst(subsetvars = self$subset_expr)
       }
-      # assert_that(is.logical(subset_idx))
-      # if ((length(subset_idx) < self$n) && (length(subset_idx) > 1L)) {
-        # if (gvars$verbose) message("subset_idx has smaller length than self$n; repeating subset_idx p times, for p: " %+% data$p)
-        # subset_idx <- rep.int(subset_idx, data$p)
-        # if (length(subset_idx) != self$n) stop("BinDat$define.subset_idx: self$n is not equal to nobs!")
-      # }
-      # assert_that((length(subset_idx) == self$n) || (length(subset_idx) == 1L))
       return(subset_idx)
     },
 
-    # Sets X_mat, Yvals, evaluates subset and performs correct subseting of data
+    # set X_mat, Yvals, evaluates subset and performs correct subseting of data
     # everything is performed using data$ methods (data is of class DataStore)
     setdata = function(data, getoutvar, ...) {
       assert_that(is.DataStore(data))
       self$n <- data$nobs
       self$subset_idx <- self$define.subset_idx(data)
-      if (getoutvar) private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # Always a vector
+      if (getoutvar) {
+        private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # always a vector
+        private$wts <- data$get.wts(self$subset_idx)   # set the weights only when the outcome is being set as well
+      }
       if (length(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
-        # private$X_mat <- data.table::as.data.table(matrix(, nrow = 0L, ncol = (length(self$predvars) + 1)))
         private$X_mat <- data.table::as.data.table(matrix(, nrow = 0L, ncol = (length(self$predvars))))
-        # colnames(private$X_mat) <- c("Intercept", self$predvars)
         colnames(private$X_mat) <- c(self$predvars)
       } else {
         # *** THIS IS THE ONLY LOCATION IN THE PACKAGE WHERE CALL TO DataStore$get.dat.sWsA() IS MADE ***
@@ -203,6 +199,7 @@ BinDat <- R6Class(classname = "BinDat",
       invisible(self)
     },
 
+    ## set the design matrix / outcome when pool=TRUE (the estimate of the bin hazards is fit only once by pooling all bin indicators together)
     setdata.long = function(data, ...) {
       assert_that(is.DataStore(data))
       self$n <- data$nobs
@@ -219,30 +216,31 @@ BinDat <- R6Class(classname = "BinDat",
         print(paste0("self$data$active.bin.sVar: ", data$active.bin.sVar));
         print(paste0("self$outvar: ", self$outvar));
         print(paste0("self$nbins: ", self$nbins));
+        print(paste0("self$weights: ", self$weights));
       }
 
       binID_seq <- 1L:self$nbins
-      # BinsDat_wide <- data$get.dat.sWsA(self$subset_idx, self$outvars_to_pool)
-      BinsDat_wide <- data$get.dat.sWsA(self$subset_idx, c(self$predvars, self$outvars_to_pool))
+      pool_set <- c(self$predvars, self$outvars_to_pool)
+      ## add the weights col to the set of pooling variables, if available
+      if (!is.null(self$weights)) {
+        pool_set <- c(self$weights, pool_set)
+      }
+      BinsDat_wide <- data$get.dat.sWsA(self$subset_idx, pool_set)
       self$ID <- as.integer(1:nrow(BinsDat_wide))
       # To grab bin Ind mat directly (prob a bit faster): BinsDat_wide <- data$dat.bin.sVar[self$subset_idx, ]
       sVar_melt_DT <- binirized.to.DTlong(BinsDat_wide = BinsDat_wide, binID_seq = binID_seq, ID = self$ID,
                                           bin_names = self$bin_names, pooled_bin_name = self$pooled_bin_name,
-                                          name.sVar = self$outvar, predvars = self$predvars)
-      ## no longer needed:
-      # sVar_melt_DT <- join.Xmat(X_mat = data$get.dat.sWsA(self$subset_idx, self$predvars),
-      #                           sVar_melt_DT = sVar_melt_DT, ID = self$ID)
-      # prepare design matrix for modeling w/ glm.fit or speedglm.wfit:
-      X_mat <- sVar_melt_DT[,c("bin_ID", self$predvars), with=FALSE] # [, c("Intercept") := 1] # select bin_ID + predictors, add intercept column
-      # setcolorder(X_mat, c("bin_ID", self$predvars)) # re-order columns by reference (no copy)
+                                          name.sVar = self$outvar, predvars = self$predvars, weights = self$weights)
+      # prep design mat for fitting pooled bin hazards:
+      X_mat <- sVar_melt_DT[, c("bin_ID", self$predvars), with=FALSE] # select bin_ID + predictors
+      if (!is.null(self$weights)) {
+        private$wts <- sVar_melt_DT[[self$weights]]
+      }
       self$ID <- sVar_melt_DT[["ID"]]
-      # private$X_mat <- as.matrix(X_mat)
       private$X_mat <- X_mat
       private$Y_vals <- sVar_melt_DT[, self$pooled_bin_name, with = FALSE][[1]] # outcome vector:
-
       self$n <- length(private$Y_vals)
       self$subset_idx <- 1:self$n
-
       invisible(self)
     }
   ),
@@ -260,12 +258,14 @@ BinDat <- R6Class(classname = "BinDat",
       return(X_mat)
     },
     getXDT = function() { return(private$X_mat) },
-    getY = function() {private$Y_vals}
+    getY = function() { private$Y_vals },
+    getweights = function() { private$wts }
   ),
 
   private = list(
     X_mat = NULL,
-    Y_vals = NULL
+    Y_vals = NULL,
+    wts = NULL
   )
 )
 
@@ -493,23 +493,6 @@ BinOutModel  <- R6Class(classname = "BinOutModel",
         probA1 <- self$binfitalgorithm$predict(datsum_obj = self$bindat, m.fit = private$m.fit)
         sampleA <- rep.int(0L, n)
         sampleA[self$getsubset] <- rbinom(n = n, size = 1, prob = probA1)
-      #   indA <- newdata$get.outvar(self$getsubset, self$getoutvarnm) # Always a vector of 0/1
-      #   assert_that(is.integerish(indA)) # check that obsdat.sA is always a vector of of integers
-      #   probAeqa <- rep.int(1L, n) # for missing, the likelihood is always set to P(A = a) = 1.
-      #   assert_that(!any(is.na(probA1[self$getsubset]))) # check that predictions P(A=1 | dmat) exist for all obs.
-      #   probA1 <- probA1[self$getsubset]
-      #   # discrete version for the joint density:
-      #   probAeqa[self$getsubset] <- probA1^(indA) * (1 - probA1)^(1L - indA)
-      #   # continuous version for the joint density:
-      #   # probAeqa[self$getsubset] <- (probA1^indA) * exp(-probA1)^(1 - indA)
-      #   # Alternative intergrating the last hazard chunk up to x:
-      #   # difference of sA value and its left most bin cutoff: x - b_{j-1}
-      #   if (!missing(bw.j.sA_diff)) {
-      #     # + integrating the constant hazard all the way up to value of each sa:
-      #     # probAeqa[self$getsubset] <- probAeqa[self$getsubset] * (1 - bw.j.sA_diff[self$getsubset]*(1/self$bw.j)*probA1)^(indA)
-      #     # cont. version of above:
-      #     probAeqa[self$getsubset] <- probAeqa[self$getsubset] * exp(-bw.j.sA_diff[self$getsubset]*(1/self$bw.j)*probA1)^(indA)
-      #   }
       }
 
       # **********************************************************************

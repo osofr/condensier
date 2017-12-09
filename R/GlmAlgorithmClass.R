@@ -64,12 +64,13 @@ logisfitR6 <- R6Class("logisfitR6",
            if (gvars$verbose) print(paste("calling glm.generic for", self$fitfunname))
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
+           wts <- datsum_obj$getweights
 
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
              m.fit <- list(coef = rep.int(NA_real_, ncol(X_mat)))
            } else {
-             m.fit <- private$do.fit(X_mat, Y_vals)
+             m.fit <- private$do.fit(X_mat, Y_vals, wts)
            }
            fit <- list(coef = m.fit$coef, linkfun = "logit_linkinv", fitfunname = self$fitfunname)
            if (gvars$verbose) print(fit$coef)
@@ -132,14 +133,10 @@ glmR6 <- R6Class("glmR6",
         ),
   private =
     list(
-        do.fit = function(X_mat, Y_vals) {
+        do.fit = function(X_mat, Y_vals, wts = NULL) {
           ctrl <- glm.control(trace = FALSE)
-          # ctrl <- glm.control(trace = FALSE, maxit = 1000)
-          # SuppressGivenWarnings({
-          #   return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
-          # }, GetWarningsToSuppress())
           suppressWarnings({
-            return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
+            return(stats::glm.fit(x = X_mat, y = Y_vals, weights = wts, family = binomial(), control = ctrl))
           })
         },
 
@@ -169,12 +166,12 @@ speedglmR6 <- R6Class("speedglmR6",
     list(
         fallback_function = glmR6$new()$get_fit_function,
 
-        do.fit = function(X_mat, Y_vals) {
+        do.fit = function(X_mat, Y_vals, wts = NULL) {
           # , maxit=1000
-          m.fit <- try(suppressWarnings(speedglm::speedglm.wfit(X = X_mat, y = Y_vals, family = binomial(), trace = FALSE, method='Cholesky')), silent = TRUE)
+          m.fit <- try(suppressWarnings(speedglm::speedglm.wfit(X = X_mat, y = Y_vals, weights = wts, family = binomial(), trace = FALSE, method='Cholesky')), silent = TRUE)
           if (inherits(m.fit, "try-error")) { # if failed, fall back on stats::glm
             if (gvars$verbose) message("speedglm::speedglm.wfit failed, falling back on stats:glm.fit; ", m.fit)
-            return(private$fallback_function(X_mat, Y_vals))
+            return(private$fallback_function(X_mat, Y_vals, wts))
           }
           return(m.fit)
         },
