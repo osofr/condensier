@@ -1,12 +1,19 @@
 Package: condensier
 Title: Non-Parametric Conditional Density Estimation
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: c(
-    person("Oleg", "Sofrygin", role=c("aut", "cre"), email="oleg.sofrygin@gmail.com"),
-    person("Frank", "Blaauw", role="aut", email="f.j.blaauw@rug.nl"),
-    person("Antoine", "Chambaz", role="aut", email="achambaz@u-paris10.fr"),
-    person(c("Mark", "J."), "van der Laan", role="aut", email="laan@berkeley.edu"))
-Description: Nonparametric conditional density estimation with binned histograms.
+    person("Oleg", "Sofrygin", email = "oleg.sofrygin@gmail.com",
+           role = c("aut", "cre")),
+    person("Frank", "Blaauw", email = "f.j.blaauw@rug.nl",
+           role = "aut"),
+    person("Antoine", "Chambaz", email = "achambaz@u-paris10.fr",
+           role = "aut"),
+    person(c("Mark", "J."), "van der Laan", email = "laan@berkeley.edu",
+           role = c("aut", "ths")),
+    person("Nima", "Hejazi", email  = "nh@nimahejazi.org",
+           role = "ctb"))
+Description: Nonparametric conditional density estimation with binned
+    histograms.
 URL: https://github.com/osofr/condensier
 BugReports: https://github.com/osofr/condensier/issues
 Depends:
@@ -35,18 +42,18 @@ VignetteBuilder: knitr
 License: GPL-2
 LazyData: true
 RoxygenNote: 6.0.1
-Collate: 
-    'GlmAlgorithmClass.R'
-    'BinOutModelClass.R'
-    'DataStoreClass.R'
-    'OLD_densifier-package.R'
-    'OLD_densifier.R'
-    'OLD_modelhdensity.R'
-    'RcppExports.R'
-    'RegressionClass.R'
-    'SummariesModelClass.R'
-    'SummaryModelCategorClasss.R'
-    'SummaryModelContinClasss.R'
-    'dhist.r'
-    'fit.R'
-    'zzz.R'
+Collate:
+   'GlmAlgorithmClass.R'
+   'BinOutModelClass.R'
+   'DataStoreClass.R'
+   'OLD_densifier-package.R'
+   'OLD_densifier.R'
+   'OLD_modelhdensity.R'
+   'RcppExports.R'
+   'RegressionClass.R'
+   'SummariesModelClass.R'
+   'SummaryModelCategorClasss.R'
+   'SummaryModelContinClasss.R'
+   'dhist.r'
+   'fit.R'
+   'zzz.R'
