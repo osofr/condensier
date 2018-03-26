@@ -15,7 +15,8 @@
 #' @importFrom methods is
 #' @importFrom stats approx quasibinomial binomial coef glm.control glm.fit plogis predict qlogis qnorm quantile rnorm terms var predict glm.control
 #' @importFrom utils data head str
-
+#' @keywords internal
+#
 #-----------------------------------------------------------------------------
 # Class Membership Tests
 #-----------------------------------------------------------------------------

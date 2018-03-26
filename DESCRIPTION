@@ -39,21 +39,21 @@ Suggests:
     testthat,
     mockery
 VignetteBuilder: knitr
+Encoding: UTF-8
 License: GPL-2
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 Collate:
-   'GlmAlgorithmClass.R'
-   'BinOutModelClass.R'
-   'DataStoreClass.R'
-   'OLD_densifier-package.R'
-   'OLD_densifier.R'
-   'OLD_modelhdensity.R'
-   'RcppExports.R'
-   'RegressionClass.R'
-   'SummariesModelClass.R'
-   'SummaryModelCategorClasss.R'
-   'SummaryModelContinClasss.R'
-   'dhist.r'
-   'fit.R'
-   'zzz.R'
+    'GlmAlgorithmClass.R'
+    'BinOutModelClass.R'
+    'DataStoreClass.R'
+    'OLD_densifier.R'
+    'OLD_modelhdensity.R'
+    'RcppExports.R'
+    'RegressionClass.R'
+    'SummariesModelClass.R'
+    'SummaryModelCategorClasss.R'
+    'SummaryModelContinClasss.R'
+    'dhist.r'
+    'fit.R'
+    'zzz.R'

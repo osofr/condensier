@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // logit_linkinv
 NumericVector logit_linkinv(NumericVector eta);
-RcppExport SEXP condensier_logit_linkinv(SEXP etaSEXP) {
+RcppExport SEXP _condensier_logit_linkinv(SEXP etaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,7 +18,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"condensier_logit_linkinv", (DL_FUNC) &condensier_logit_linkinv, 1},
+    {"_condensier_logit_linkinv", (DL_FUNC) &_condensier_logit_linkinv, 1},
     {NULL, NULL, 0}
 };
 
