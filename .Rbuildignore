@@ -4,6 +4,7 @@
 ^cran-comments\.md$
 ^tmlenet\.do$
 ^README\.html$
+^README\.Rmd$
 ^.Rprofile$
 ^inst/db$
 ^tests/$
