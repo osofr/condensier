@@ -40,7 +40,9 @@ Suggests:
     roxygen2,
     testthat,
     mockery,
-    dplyr
+    dplyr,
+    tools,
+    mixtools
 VignetteBuilder: knitr
 Encoding: UTF-8
 License: GPL-2
