@@ -78,69 +78,69 @@ test_that("Sample values are a mixture of N(0, 1) and N(4, 1) for W1 = 1.", {
 
 ################################################################################
 
-################################################################################
-# SETTING 1 FROM https://github.com/osofr/condensier/pull/12
-# @BENKESER COMMENT 14 DECEMBER 2018
-################################################################################
+#################################################################################
+## SETTING 1 FROM https://github.com/osofr/condensier/pull/12
+## @BENKESER COMMENT 14 DECEMBER 2018
+#################################################################################
 
-# $$W_1 \sim \text{Bin}(p = 0.5)$$
-# $$\Delta \mid W_1 = w_1 \sim Bin(Logistic(loc = w_1))$$
-# $$A \mid W_1 = w_1 \sim N(\mu = 2 \cdot w_1, \sigma = 1)$$
-# $$O = (W_1, \Delta \cdot A)$$
-sim_data_set1 <- function(n_obs = 1000, w_prob = 0.5) {
-  w <- rbinom(n = n_obs, size = 1, prob = w_prob)
-  delta <- rbinom(n = n_obs, size = 1, prob = plogis(w))
-  a <- rnorm(n = n_obs, mean = 2 * w, sd = 1)
-  data_in <- as.data.table(cbind(a, delta, w, 1 / plogis(w))) %>%
-    setnames(., c("A", "Delta", "W", "Weights")) %>%
-    dplyr::filter(Delta == 1) %>%
-    dplyr::select(-Delta)
-  return(data_in)
-}
+## $$W_1 \sim \text{Bin}(p = 0.5)$$
+## $$\Delta \mid W_1 = w_1 \sim Bin(Logistic(loc = w_1))$$
+## $$A \mid W_1 = w_1 \sim N(\mu = 2 \cdot w_1, \sigma = 1)$$
+## $$O = (W_1, \Delta \cdot A)$$
+#sim_data_set1 <- function(n_obs = 1000, w_prob = 0.5) {
+  #w <- rbinom(n = n_obs, size = 1, prob = w_prob)
+  #delta <- rbinom(n = n_obs, size = 1, prob = plogis(w))
+  #a <- rnorm(n = n_obs, mean = 2 * w, sd = 1)
+  #data_in <- as.data.table(cbind(a, delta, w, 1 / plogis(w))) %>%
+    #setnames(., c("A", "Delta", "W", "Weights")) %>%
+    #dplyr::filter(Delta == 1) %>%
+    #dplyr::select(-Delta)
+  #return(data_in)
+#}
 
-fit1 <- fit_density(X = "W", Y = "A", input_data = data_in,
-                    bin_method = "equal.mass", nbins = n_bins,
-                    bin_estimator = speedglmR6$new())
-fit2 <- fit_density(X = "W", Y = "A", input_data = data_in,
-                    bin_method = "equal.mass", nbins = n_bins,
-                    bin_estimator = speedglmR6$new(), weights = "Weights")
-preds1 <- sample_value(model_fit = fit1, newdata = data_in)
-preds2 <- sample_value(model_fit = fit2, newdata = data_in)
+#fit1 <- fit_density(X = "W", Y = "A", input_data = data_in,
+                    #bin_method = "equal.mass", nbins = n_bins,
+                    #bin_estimator = speedglmR6$new())
+#fit2 <- fit_density(X = "W", Y = "A", input_data = data_in,
+                    #bin_method = "equal.mass", nbins = n_bins,
+                    #bin_estimator = speedglmR6$new(), weights = "Weights")
+#preds1 <- sample_value(model_fit = fit1, newdata = data_in)
+#preds2 <- sample_value(model_fit = fit2, newdata = data_in)
 
-################################################################################
+#################################################################################
 
-################################################################################
-# SETTING 2 FROM https://github.com/osofr/condensier/pull/12
-# @BENKESER COMMENT 14 DECEMBER 2018
-################################################################################
+#################################################################################
+## SETTING 2 FROM https://github.com/osofr/condensier/pull/12
+## @BENKESER COMMENT 14 DECEMBER 2018
+#################################################################################
 
-#$$W_1 \sim Binom(p = 0.5)$$
-#$$W_2 \sim Binom(p = 0.5)$$
-#$$\Delta \mid W_1 = w_1, W_2 = w_2 \sim Bin(Logistic(w_1 + w_2))$$
-#$$A | W_1 = w_1, W_2 = w_2 ~ N(\mu = 2 \cdot w_1 \cdot w_2, \sigma = 1)$$
-#$$O = (W_1, \Delta \cdot W_2, \Delta \cdot A)$$
+##$$W_1 \sim Binom(p = 0.5)$$
+##$$W_2 \sim Binom(p = 0.5)$$
+##$$\Delta \mid W_1 = w_1, W_2 = w_2 \sim Bin(Logistic(w_1 + w_2))$$
+##$$A | W_1 = w_1, W_2 = w_2 ~ N(\mu = 2 \cdot w_1 \cdot w_2, \sigma = 1)$$
+##$$O = (W_1, \Delta \cdot W_2, \Delta \cdot A)$$
 
-sim_data_set2 <- function(n_obs = 1000, w_prob = 0.5) {
-  w1 <- rbinom(n = n_obs, size = 1, prob = w_prob)
-  w2 <- rbinom(n = n_obs, size = 1, prob = w_prob)
-  delta <- rbinom(n = n_obs, size = 1, prob = plogis(w1 + w2))
-  a <- rnorm(n = n_obs, mean = 2 * w1 * w2, sd = 1)
-  data_in <- as.data.table(cbind(a, delta, w1, w2, 1 / plogis(w1 + w2))) %>%
-    setnames(., c("A", "Delta", "W1", "W2", "Weights")) %>%
-    dplyr::filter(Delta == 1) %>%
-    dplyr::select(-Delta)
-  return(data_in)
-}
+#sim_data_set2 <- function(n_obs = 1000, w_prob = 0.5) {
+  #w1 <- rbinom(n = n_obs, size = 1, prob = w_prob)
+  #w2 <- rbinom(n = n_obs, size = 1, prob = w_prob)
+  #delta <- rbinom(n = n_obs, size = 1, prob = plogis(w1 + w2))
+  #a <- rnorm(n = n_obs, mean = 2 * w1 * w2, sd = 1)
+  #data_in <- as.data.table(cbind(a, delta, w1, w2, 1 / plogis(w1 + w2))) %>%
+    #setnames(., c("A", "Delta", "W1", "W2", "Weights")) %>%
+    #dplyr::filter(Delta == 1) %>%
+    #dplyr::select(-Delta)
+  #return(data_in)
+#}
 
-data_in <- sim_data_set2(n_obs = n_samp)
-fit1 <- fit_density(X = c(paste0("W", seq_len(2))), Y = "A",
-                    input_data = data_in,
-                    bin_method = "equal.mass", nbins = n_bins,
-                    bin_estimator = speedglmR6$new())
-fit2 <- fit_density(X = c(paste0("W", seq_len(2))), Y = "A",
-                    input_data = data_in,
-                    bin_method = "equal.mass", nbins = n_bins,
-                    bin_estimator = speedglmR6$new(), weights = "Weights")
-preds1 <- sample_value(model_fit = fit1, newdata = data_in)
-preds2 <- sample_value(model_fit = fit2, newdata = data_in)
+#data_in <- sim_data_set2(n_obs = n_samp)
+#fit1 <- fit_density(X = c(paste0("W", seq_len(2))), Y = "A",
+                    #input_data = data_in,
+                    #bin_method = "equal.mass", nbins = n_bins,
+                    #bin_estimator = speedglmR6$new())
+#fit2 <- fit_density(X = c(paste0("W", seq_len(2))), Y = "A",
+                    #input_data = data_in,
+                    #bin_method = "equal.mass", nbins = n_bins,
+                    #bin_estimator = speedglmR6$new(), weights = "Weights")
+#preds1 <- sample_value(model_fit = fit1, newdata = data_in)
+#preds2 <- sample_value(model_fit = fit2, newdata = data_in)
 
