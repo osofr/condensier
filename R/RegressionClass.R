@@ -132,7 +132,7 @@ RegressionClass <- R6Class("RegressionClass",
                           bin_bydhist = FALSE,
                           max_nperbin = 1000,
                           pool = FALSE,
-                          weights = weights
+                          weights = NULL
                           ) {
 
       assert_that(length(outvar.class) == length(outvar))
