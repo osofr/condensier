@@ -7,7 +7,7 @@
 fit_density(X, Y, input_data, bin_method = c("equal.mass", "equal.len",
   "dhist"), nbins = 5, max_n_cat = 20, pool = FALSE,
   max_n_bin = NA_integer_, parfit = FALSE,
-  bin_estimator = speedglmR6$new(), intrvls = NULL,
+  bin_estimator = speedglmR6$new(), intrvls = NULL, weights = NULL,
   verbose = getOption("condensier.verbose"))
 }
 \arguments{
@@ -58,8 +58,10 @@ By default the bins are defined automatically (based on the selected binning met
 When this argument is used it will over-ride automatic bin selection. This options should be
 only used when fine-tuned control over bin definitions is desired.}
 
-\item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
+\item{weights}{Specify the column in the input data containing the optional weights.
 Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
+
+\item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.}
 }
 \value{
 An R6 object of class \code{SummariesModel} containing the conditional density fit(s).
