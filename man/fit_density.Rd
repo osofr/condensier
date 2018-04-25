@@ -58,10 +58,11 @@ By default the bins are defined automatically (based on the selected binning met
 When this argument is used it will over-ride automatic bin selection. This options should be
 only used when fine-tuned control over bin definitions is desired.}
 
-\item{weights}{Specify the column in the input data containing the optional weights.
-Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
+\item{weights}{Specify the column name in the input data containing the optional weights.
+Optionally, pass the weights as a numeric vector.}
 
-\item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.}
+\item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
+Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
 }
 \value{
 An R6 object of class \code{SummariesModel} containing the conditional density fit(s).
