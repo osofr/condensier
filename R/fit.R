@@ -39,8 +39,9 @@
 #' When this argument is used it will over-ride automatic bin selection. This options should be
 #' only used when fine-tuned control over bin definitions is desired.
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
-#' @param weights Specify the column in the input data containing the optional weights.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
+#' @param weights Specify the column in the input data containing the optional weights.
+#' Optionally, specify the weights as a numeric vector.
 #'
 #' @section Details:
 #' **********************************************************************

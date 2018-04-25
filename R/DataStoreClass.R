@@ -355,7 +355,12 @@ DataStore <- R6Class(classname = "DataStore",
 
     get.wts = function(rowsubset = TRUE) {
       if (!is.null(self$weights)) {
-        return(self$get.outvar(rowsubset, self$weights))
+        if (is.character(self$weights)) {
+          if (length(self$weights)>1) stop("when specified by name 'weights' column should be a vector of length 1")
+          return(self$get.outvar(rowsubset, self$weights))  
+        } else {
+          return(self$weights[rowsubset])
+        }
       } else {
         return(NULL)
       }

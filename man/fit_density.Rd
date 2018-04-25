@@ -59,9 +59,10 @@ When this argument is used it will over-ride automatic bin selection. This optio
 only used when fine-tuned control over bin definitions is desired.}
 
 \item{weights}{Specify the column in the input data containing the optional weights.
-Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
+Optionally, specify the weights as a numeric vector.}
 
-\item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.}
+\item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
+Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
 }
 \value{
 An R6 object of class \code{SummariesModel} containing the conditional density fit(s).
