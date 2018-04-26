@@ -65,7 +65,10 @@ fit_dens_out <- fit_density(X = "W1", Y = "DeltaA", weights = "IPCW",
                             bin_method = "equal.mass",
                             bin_estimator = condensier::speedglmR6$new(),
                             parfit = FALSE)
-fit_preds <- predict_probability(model_fit = fit_dens_out, newdata = data_in)
+fit_preds <- sample_value(model_fit = fit_dens_out, newdata = data_in)
+
+preds1 <- predict_probability(model_fit = fit_dens_out, newdata = data_in)
+
 
 fit_dens_out2 <- fit_density(X = "W1", Y = "DeltaA", weights = data_in[["IPCW"]],
                             input_data = data_in,
@@ -73,14 +76,14 @@ fit_dens_out2 <- fit_density(X = "W1", Y = "DeltaA", weights = data_in[["IPCW"]]
                             bin_method = "equal.mass",
                             bin_estimator = condensier::speedglmR6$new(),
                             parfit = FALSE)
-fit_preds2 <- predict_probability(model_fit = fit_dens_out2, newdata = data_in)
+preds2 <- predict_probability(model_fit = fit_dens_out2, newdata = data_in)
 
 test_that(paste("Weights argument as name and as vector are identical",
                 "Sample values are N(0, 1) for W1 = 0."), {
-  expect_equal(sum(abs(fit_preds-fit_preds2)), expected = 0, tol = 0.02)
+  expect_equal(sum(abs(preds1-preds2)), expected = 0, tol = 0.02)
 })
 
-fit_preds <- sample_value(model_fit = fit_dens_out, newdata = data_in)
+
 # sample values should be N(0, 1) for W1 = 0:
 test_that(paste("Weights argument works properly:",
                 "Sample values are N(0, 1) for W1 = 0."), {
