@@ -80,6 +80,7 @@ test_that(paste("Weights argument as name and as vector are identical",
   expect_equal(sum(abs(fit_preds-fit_preds2)), expected = 0, tol = 0.02)
 })
 
+fit_preds <- sample_value(model_fit = fit_dens_out, newdata = data_in)
 # sample values should be N(0, 1) for W1 = 0:
 test_that(paste("Weights argument works properly:",
                 "Sample values are N(0, 1) for W1 = 0."), {
