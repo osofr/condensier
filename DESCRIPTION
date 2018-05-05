@@ -46,10 +46,10 @@ Suggests:
     mixtools
 VignetteBuilder: knitr
 Encoding: UTF-8
-License: MIT
+License: MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.0.1.9000
-Collate: 
+Collate:
     'GlmAlgorithmClass.R'
     'BinOutModelClass.R'
     'DataStoreClass.R'

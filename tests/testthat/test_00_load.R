@@ -10,7 +10,8 @@ if(FALSE) {
   document()
   load_all("./", create = FALSE) # load all R files in /R and datasets in /data. Ignores NAMESPACE:
   # condensier:::debug_set() # SET TO DEBUG MODE
-
+  # devtools::use_mit_license()
+  
   setwd("..");
   install("condensier", build_vignettes = FALSE, dependencies = FALSE) # INSTALL W/ devtools:
 
