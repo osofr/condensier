@@ -1,3 +1,6 @@
+#' @importFrom speedglm speedglm.wfit
+NULL
+
 #' logisfitR6
 #'
 #' @docType class

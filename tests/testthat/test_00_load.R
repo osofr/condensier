@@ -8,7 +8,7 @@ if(FALSE) {
   # library("data.table")
   # setwd(".."); setwd(".."); getwd()
   # document()
-  # load_all("./", create = FALSE) # load all R files in /R and datasets in /data. Ignores NAMESPACE:
+  # load_all("./") # load all R files in /R and datasets in /data. Ignores NAMESPACE:
   # # condensier:::debug_set() # SET TO DEBUG MODE
   # # devtools::use_mit_license()
   

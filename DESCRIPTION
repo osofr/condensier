@@ -24,11 +24,9 @@ Depends:
 Imports:
     assertthat,
     data.table,
-    Matrix,
     methods,
     R6,
     Rcpp,
-    simcausal,
     speedglm,
     stats,
     stringr
@@ -40,6 +38,7 @@ Suggests:
     matrixStats,
     roxygen2,
     testthat,
+    simcausal,
     mockery,
     here,
     dplyr,
