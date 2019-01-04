@@ -1,18 +1,19 @@
 Package: condensier
 Title: Non-Parametric Conditional Density Estimation
-Version: 0.0.3
+Version: 0.1.0
 Authors@R: c(
     person("Oleg", "Sofrygin", email = "oleg.sofrygin@gmail.com",
-           role = c("aut", "cre")),
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9539-8853")),
+    person("Nima", "Hejazi", email  = "nh@nimahejazi.org",
+           role = "ctb",
+           comment = c(ORCID = "0000-0002-7127-2789")),
     person("Frank", "Blaauw", email = "f.j.blaauw@rug.nl",
-           role = "aut"),
+           role = "ctb"),
     person("Antoine", "Chambaz", email = "achambaz@u-paris10.fr",
            role = "aut"),
     person(c("Mark", "J."), "van der Laan", email = "laan@berkeley.edu",
-           role = "aut"),
-    person("Nima", "Hejazi", email  = "nh@nimahejazi.org",
-           role = "ctb",
-           comment = c(ORCID = "0000-0002-7127-2789"))
+           role = "aut")
     )
 Description: Nonparametric conditional density estimation with binned
     histograms.
@@ -48,7 +49,7 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 License: MIT + file LICENSE
 LazyData: true
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.1
 Collate:
     'GlmAlgorithmClass.R'
     'BinOutModelClass.R'
