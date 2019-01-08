@@ -40,6 +40,8 @@
 #' only used when fine-tuned control over bin definitions is desired.
 #' @param verbose Set to \code{TRUE} to print messages on status and information to the console.
 #' Turn this on by default using \code{options(condensier.verbose=TRUE)}.
+#' @param weights Specify the column in the input data containing the optional weights.
+#' Optionally, specify the weights as a numeric vector.
 #'
 #' @section Details:
 #' **********************************************************************
@@ -182,6 +184,7 @@ fit_density <- function(
                       parfit = FALSE,
                       bin_estimator = speedglmR6$new(),
                       intrvls = NULL,
+                      weights = NULL,
                       verbose = getOption("condensier.verbose")
                       ) {
 
@@ -195,21 +198,11 @@ fit_density <- function(
   } else { stop("bin_method argument must be either 'equal.len', 'equal.mass' or 'dhist'") }
 
   nbins <- nbins[1L]
-  # opts <- list(
-  #   bin_estimator = bin_estimator,
-  #   bin_method = bin_method,
-  #   parfit = parfit,
-  #   nbins = nbins,
-  #   max_n_cat = max_n_cat,
-  #   pool = pool,
-  #   max_n_bin = max_n_bin
-  # )
-  # gvars$opts <- opts
 
   if (!is.data.table(input_data)) data.table::setDT(input_data)
 
   ## import the input data into internal storage class
-  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X, max_n_cat = max_n_cat)
+  data_store_obj <- DataStore$new(input_data = input_data, Y = Y, X = X, max_n_cat = max_n_cat, weights = weights)
 
   # Find the class of the provided variable
   outcome.class <- data_store_obj$type.sVar[Y]
@@ -225,7 +218,8 @@ fit_density <- function(
                                   bin_bydhist = bin_method%in%"dhist",
                                   max_nperbin = max_n_bin,
                                   pool = pool,
-                                  intrvls = intrvls)
+                                  intrvls = intrvls,
+                                  weights = weights)
                                   # subset = subset_vars)
 
   # Create the conditional density, based on the regression just specified and fit it

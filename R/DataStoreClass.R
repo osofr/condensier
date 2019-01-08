@@ -194,13 +194,15 @@ DataStore <- R6Class(classname = "DataStore",
     active.bin.sVar = NULL,    # name of active binarized cont sVar, changes as fit/predict is called (bin indicators are temp. stored in mat.bin.sVar)
     mat.bin.sVar = NULL,       # temp storage mat for bin indicators on currently binarized continous sVar (from self$active.bin.sVar)
     ord.sVar = NULL,           # Ordinal (cat) transform for continous sVar
+    weights = NULL,
 
-    initialize = function(input_data, X, Y, auto_typing = TRUE, max_n_cat = 20, ...) {
+    initialize = function(input_data, X, Y, auto_typing = TRUE, max_n_cat = 20, weights = NULL, ...) {
       if (!is.data.table(input_data)) data.table::setDT(input_data)
       self$dat.sVar <- input_data
       self$nodes <- list(X = X, Y = Y)
 
       self$max_n_cat <- max_n_cat
+      self$weights <- weights
 
       ## We need to evaluate the types of OUTCOME VARIABLES ONLY (the types of predictors are irrelevant)
       if (auto_typing) self$def.types.sVar(Y = Y) # Define the type of each Y: bin, cat or cont
@@ -331,7 +333,7 @@ DataStore <- R6Class(classname = "DataStore",
     },
 
     get.outvar = function(rowsubset = TRUE, var) {
-      if (length(self$nodes) < 1) stop("DataStore$nodes list is empty!")
+      # if (length(self$nodes) < 1) stop("DataStore$nodes list is empty!")
 
       if (var %in% self$names.sWsA) {
         out <- self$dat.sWsA[rowsubset, var, with = FALSE]
@@ -349,6 +351,19 @@ DataStore <- R6Class(classname = "DataStore",
         return(out)
       }
 
+    },
+
+    get.wts = function(rowsubset = TRUE) {
+      if (!is.null(self$weights)) {
+        if (is.character(self$weights)) {
+          if (length(self$weights)>1) stop("when specified by name 'weights' column should be a vector of length 1")
+          return(self$get.outvar(rowsubset, self$weights))  
+        } else {
+          return(self$weights[rowsubset])
+        }
+      } else {
+        return(NULL)
+      }
     },
 
     # Need to find a way to over-ride nbins for categorical vars (allowing it to be set to more than gvars$max_n_cat)!

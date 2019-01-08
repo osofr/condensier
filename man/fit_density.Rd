@@ -7,7 +7,7 @@
 fit_density(X, Y, input_data, bin_method = c("equal.mass", "equal.len",
   "dhist"), nbins = 5, max_n_cat = 20, pool = FALSE,
   max_n_bin = NA_integer_, parfit = FALSE,
-  bin_estimator = speedglmR6$new(), intrvls = NULL,
+  bin_estimator = speedglmR6$new(), intrvls = NULL, weights = NULL,
   verbose = getOption("condensier.verbose"))
 }
 \arguments{
@@ -57,6 +57,9 @@ vector of numeric cutoffs that define the bins.
 By default the bins are defined automatically (based on the selected binning method).
 When this argument is used it will over-ride automatic bin selection. This options should be
 only used when fine-tuned control over bin definitions is desired.}
+
+\item{weights}{Specify the column in the input data containing the optional weights.
+Optionally, specify the weights as a numeric vector.}
 
 \item{verbose}{Set to \code{TRUE} to print messages on status and information to the console.
 Turn this on by default using \code{options(condensier.verbose=TRUE)}.}
@@ -253,6 +256,7 @@ dens_fit <- fit_density(
     Y = "sA",
     input_data = datO,
     bin_estimator = speedglmR6$new(),
+    nbins = 5,
     intrvls = list(sA = seq(-4,4, by = 0.1)))
 
 
@@ -266,5 +270,6 @@ dens_fit <- fit_density(
     input_data = datO,
     bin_estimator = speedglmR6$new(),
     intrvls = list(sA = seq(-4,4, by = 0.1)),
+    nbins = 5,
     pool = TRUE)
 }

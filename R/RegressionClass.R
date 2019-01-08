@@ -117,6 +117,7 @@ RegressionClass <- R6Class("RegressionClass",
                                    # CAN BE QUERIED BY BinOutModel$predictAeqa() as: intrvls.width[outvar]
     intrvls = NULL,                # Vector of numeric cutoffs defining the bins or a named list of numeric intervals (for length(self$outvar) > 1)
     levels = NULL,
+    weights = NULL,
     # family = NULL,               # (NOT IMPLEMENTED) to run w/ other than "binomial" family
     # form = NULL,                 # (NOT IMPLEMENTED) reg formula, if provided run using the usual glm / speedglm functions
     # Adding ReplMisVal0 = TRUE below for case sA = (netA, sA[j]) with sA[j] continuous, was causing an error otherwise
@@ -130,7 +131,8 @@ RegressionClass <- R6Class("RegressionClass",
                           bin_bymass = TRUE,
                           bin_bydhist = FALSE,
                           max_nperbin = 1000,
-                          pool = FALSE
+                          pool = FALSE,
+                          weights = NULL
                           ) {
 
       assert_that(length(outvar.class) == length(outvar))
@@ -155,6 +157,7 @@ RegressionClass <- R6Class("RegressionClass",
       self$bin_bydhist <- bin_bydhist
       self$max_nperbin <- max_nperbin
       self$pool <- pool
+      self$weights <- weights
 
       if (!missing(intrvls)) {
         if (!is.null(intrvls)) {
@@ -278,7 +281,9 @@ RegressionClass <- R6Class("RegressionClass",
       list(outvar.class = self$outvar.class,
           outvar = self$outvar,
           predvars = self$predvars,
-          subset = self$subset)
+          subset = self$subset, 
+          pool = self$pool,
+          weights = self$weights)
     }
   )
 )

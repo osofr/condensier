@@ -1,3 +1,6 @@
+#' @importFrom speedglm speedglm.wfit
+NULL
+
 #' logisfitR6
 #'
 #' @docType class
@@ -6,13 +9,16 @@ logisfitR6 <- R6Class("logisfitR6",
   public =
     list(
          lmclass = NULL,
-         fitfunname = NULL,
+         fitfunName = NULL,
          initialize = function() {
            self$get_validity
          },
 
          predict.long = function(datsum_obj, m.fit) {
-           if (gvars$verbose) print(paste("calling predict.long for", self$fitfunname))
+           if (gvars$verbose) {
+             print(paste("calling predict.long for", self$fitfunname))
+           }
+           # want to add a weights argument to the data storage class here
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
            assert_that(!is.null(datsum_obj));assert_that(!is.null(X_mat));
@@ -74,6 +80,7 @@ logisfitR6 <- R6Class("logisfitR6",
            has_failed <- FALSE
 
            if (gvars$verbose) print(paste('0 = ', sum(Y_vals==0), ' 1 =',  sum(Y_vals==1)))
+           wts <- datsum_obj$getweights
 
            # X_mat has 0 rows: return NA's and avoid throwing exception:
            if (nrow(X_mat) == 0L) {
@@ -83,7 +90,8 @@ logisfitR6 <- R6Class("logisfitR6",
              has_failed <- TRUE
            } else {
 
-            m.fit <- try(m.fit <- fn(X_mat, Y_vals, ...), silent = TRUE)
+             # TODO FRANK: Handle the exception correctly here!
+            m.fit <- try(m.fit <- fn(X_mat, Y_vals, wts, ...), silent = TRUE)
 
             # If an algorithm fails, we fall back to the fallback function (which is generally the glm function.
             # Cases where this happens include empty bins, constant bins, or bins with a single outcome
@@ -92,7 +100,6 @@ logisfitR6 <- R6Class("logisfitR6",
               m.fit <- private$get_fallback_function()(X_mat, Y_vals)
               has_failed <- TRUE
             }
-
            }
            fit <- list(coef = m.fit,
                        linkfun = "logit_linkinv",
@@ -204,14 +211,15 @@ glmR6 <- R6Class("glmR6",
         ),
   private =
     list(
-        do.fit = function(X_mat, Y_vals) {
+        do.fit = function(X_mat, Y_vals, wts = NULL) {
+          ctrl <- glm.control(trace = FALSE)
           # ctrl <- glm.control(trace = FALSE, maxit = 1000)
           # SuppressGivenWarnings({
           #   return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl))
           # }, GetWarningsToSuppress())
           ctrl <- glm.control(trace = FALSE)
           suppressWarnings({
-            return(stats::glm.fit(x = X_mat, y = Y_vals, family = binomial() , control = ctrl)$coef)
+            return(stats::glm.fit(x = X_mat, y = Y_vals, weights = wts, family = binomial(), control = ctrl)$coef)
           })
         }
 
@@ -240,10 +248,11 @@ speedglmR6 <- R6Class("speedglmR6",
   private =
     list(
         do.fit = function(X_mat, Y_vals) {
-          # , maxit=1000
+
             suppressWarnings(
-              m.fit <- speedglm::speedglm.wfit(X = X_mat, y = Y_vals, family = binomial(), trace = FALSE, method='Cholesky')$coef
+              m.fit <- speedglm::speedglm.wfit(X = X_mat, y = Y_vals, weights = wts, family = binomial(), trace = FALSE, method='Cholesky')$coef
             )
+        },
 
         }
     )

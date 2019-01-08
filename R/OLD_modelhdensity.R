@@ -6,6 +6,7 @@
 # # @title Predict h weights under g_0 and g_star using existing m.h.fit model fit
 # # @name pred.hbars
 # # @export
+# # @keywords internal
 # # fit models for m_gAi
 # predict.hbars <- function(newdatnet = NULL, m.h.fit) {
 #     lbound <- m.h.fit$lbound
