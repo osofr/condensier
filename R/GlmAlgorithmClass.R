@@ -73,7 +73,11 @@ logisfitR6 <- R6Class("logisfitR6",
             return(pAout)
          },
 
-         fit = function(datsum_obj, fn = private$do.fit, ...) {
+         fit = function(datsum_obj, fn = NULL, ...) {
+           if(is.null(fn)) { 
+             fn <- private$do.fit
+           }
+
            if (gvars$verbose) print(paste("calling fit / update for", self$fitfunname))
            X_mat <- datsum_obj$getXmat
            Y_vals <- datsum_obj$getY
@@ -90,17 +94,18 @@ logisfitR6 <- R6Class("logisfitR6",
              has_failed <- TRUE
            } else {
 
-             # TODO FRANK: Handle the exception correctly here!
             m.fit <- try(m.fit <- fn(X_mat, Y_vals, wts, ...), silent = TRUE)
 
             # If an algorithm fails, we fall back to the fallback function (which is generally the glm function.
             # Cases where this happens include empty bins, constant bins, or bins with a single outcome
             if (inherits(m.fit, "try-error")) {
+              message(geterrmessage())
               if (gvars$verbose) message(self$fitfunname, "failed, falling back on stats:glm.fit; ", m.fit)
               m.fit <- private$get_fallback_function()(X_mat, Y_vals)
               has_failed <- TRUE
             }
            }
+
            fit <- list(coef = m.fit,
                        linkfun = "logit_linkinv",
                        fitfunname = self$fitfunname,
@@ -248,12 +253,9 @@ speedglmR6 <- R6Class("speedglmR6",
   private =
     list(
         do.fit = function(X_mat, Y_vals) {
-
-            suppressWarnings(
-              m.fit <- speedglm::speedglm.wfit(X = X_mat, y = Y_vals, weights = wts, family = binomial(), trace = FALSE, method='Cholesky')$coef
-            )
-        },
-
+          suppressWarnings(
+            m.fit <- speedglm::speedglm.wfit(X = X_mat, y = Y_vals, weights = wts, family = binomial(), trace = FALSE, method='Cholesky')$coef
+          )
         }
     )
 )
