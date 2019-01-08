@@ -1,4 +1,5 @@
 library(mockery)
+library(igraph)
 context("DataStore Categorical Bin Matrix")
 
 # helper function for generating some data
@@ -95,7 +96,8 @@ test_that("categorical variable can be binned in various ways, including it bein
 # Simulate network data:
 # ------------------------------------------------------------------------------------------
 get.net.densityOdat <- function(nsamp = 100000, rndseed = NULL, Kmax = 5, shift = 1, sAmax = 7) {
-  require(simcausal)
+  library(simcausal)
+  library(igraph)
   options(simcausal.verbose=FALSE)
   `%+%` <- function(a, b) paste0(a, b)
   print("shift: " %+% shift)

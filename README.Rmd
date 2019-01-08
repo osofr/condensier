@@ -27,10 +27,10 @@ BibOptions(check.entries = FALSE, style = "markdown", cite.style = "authoryear",
 
 > Fit a conditional density `f(A|W)`, where `A` can be continuous and multivariate and `W` is set of predictors.
 > This estimator breaks up the support of a continuous `A` into discrete bins and fits the conditional hazard for each bin. By default the logistic regression will be used for fitting each bin hazard. Alternatively, arbitrary machine learning algorithms can be used via learners available in `sl3` R package (see example below).
-> Given several competing candidate density estimators, one can find the optimal convex combination these candidate estimators by using Super Learner [`sl3`](https://jeremyrcoyle.github.io/sl3/).
+> Given several competing candidate density estimators, one can find the optimal convex combination these candidate estimators by using Super Learner [`sl3`].
 > For detailed description of the estimator implemented in this package see `r AutoCite(bib, "diaz2011super")` and `r AutoCite(bib, "munoz2012population")`.
 
-__Authors:__ [Oleg Sofrygin](https://github.com/osofr), [Frank Blaauw](https://github.com/frbl), [Antoine Chambaz](https://github.com/achambaz), [Mark van der Laan](https://vanderlaan-group.github.io/)
+__Authors:__ [Oleg Sofrygin](https://github.com/osofr), [Frank Blaauw](https://github.com/frbl), [Antoine Chambaz](https://github.com/achambaz), Mark van der Laan
 
 
 ### Installation

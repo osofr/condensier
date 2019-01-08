@@ -34,6 +34,7 @@ LinkingTo: Rcpp
 Suggests:
     doParallel,
     foreach,
+    igraph,
     knitr,
     matrixStats,
     roxygen2,
@@ -44,7 +45,6 @@ Suggests:
     dplyr,
     tools,
     mixtools
-VignetteBuilder: knitr
 Encoding: UTF-8
 License: MIT + file LICENSE
 LazyData: true

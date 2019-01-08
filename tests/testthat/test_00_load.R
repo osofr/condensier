@@ -22,6 +22,7 @@ if(FALSE) {
   # # setwd("./condensier"); setwd(".."); getwd()
   # devtools::check(args = "--as-cran")
   # devtools::check(args = c("--no-vignettes"), build_args = c("--no-build-vignettes")) # runs faster
+  # devtools::check_rhub()
   # # devtools::check() # runs check with devtools
   # # devtools::check(args = c("--no-vignettes"), build_args = c("--no-build-vignettes")) # runs check with devtools
   # # devtools::build_win(args = "--compact-vignettes") # build package on CRAN servers (windows os?)
@@ -30,7 +31,6 @@ if(FALSE) {
   # # devtools::build(args = c("--compact-vignettes", "--resave-data"))
   # # devtools::build(args = "--no-build-vignettes") # build package tarball compacting vignettes
   # # devtools::build() # build package tarball
-  # devtools::check_rhub()
 
   # setwd("..")
   # system("R CMD check --as-cran condensier_0.1.0.tar.gz") # check R package tar ball prior to CRAN submission
