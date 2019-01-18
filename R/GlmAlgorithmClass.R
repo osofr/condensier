@@ -93,17 +93,16 @@ logisfitR6 <- R6Class("logisfitR6",
              m.fit <- rep.int(NA_real_, ncol(X_mat))
              has_failed <- TRUE
            } else {
+             m.fit <- try(m.fit <- fn(X_mat = X_mat, Y_vals = Y_vals, wts = wts, ...), silent = TRUE)
 
-            m.fit <- try(m.fit <- fn(X_mat, Y_vals, wts, ...), silent = TRUE)
-
-            # If an algorithm fails, we fall back to the fallback function (which is generally the glm function.
-            # Cases where this happens include empty bins, constant bins, or bins with a single outcome
-            if (inherits(m.fit, "try-error")) {
-              message(geterrmessage())
-              if (gvars$verbose) message(self$fitfunname, "failed, falling back on stats:glm.fit; ", m.fit)
-              m.fit <- private$get_fallback_function()(X_mat, Y_vals)
-              has_failed <- TRUE
-            }
+             # If an algorithm fails, we fall back to the fallback function (which is generally the glm function.
+             # Cases where this happens include empty bins, constant bins, or bins with a single outcome
+             if (inherits(m.fit, "try-error")) {
+               message('Skipping further fitting of model because of error: ', geterrmessage())
+               if (gvars$verbose) message(self$fitfunname, "failed, falling back on stats:glm.fit; ", m.fit)
+               m.fit <- private$get_fallback_function()(X_mat, Y_vals)
+               has_failed <- TRUE
+             }
            }
 
            fit <- list(coef = m.fit,

@@ -185,6 +185,10 @@ BinDat <- R6Class(classname = "BinDat",
       assert_that(is.DataStore(data))
       self$n <- data$nobs
       self$subset_idx <- self$define.subset_idx(data)
+      if (getoutvar) {
+        private$Y_vals <- data$get.outvar(self$subset_idx, self$outvar) # always a vector
+        private$wts <- data$get.wts(self$subset_idx)   # set the weights only when the outcome is being set as well
+      }
 
       # We are not doing a full sum here, as it would give an integer overflow
       if (length(self$subset_idx) == 0L) {  # When nrow(X_mat) == 0L avoids exception (when nrow == 0L => prob(A=a) = 1)
